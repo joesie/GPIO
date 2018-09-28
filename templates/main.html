@@ -1,0 +1,106 @@
+<div role=\ "main\" class=\ "ui-content\">
+        <div class=\ "ui-body ui-body-a ui-corner-all loxberry-logo\">
+                <div style=\ "margin: 5%;\">
+                        <h2>Einstellungen</h2>
+                        <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi" style="border-bottom: 2px ridge #cdcdcd">
+                                <input type="hidden" id="saveCount" name="saveCount" value="saveCount">
+                                <div class="form-group">
+                                        <table class="formtable" border="0" width="100%">
+                                                <tr>
+                                                        <td width="25%" style="text-align: right;">
+                                                                <label id="input_count_label">Anzahl Eingänge:</label>
+                                                        </td>
+                                                        <td width="15%" colspan="2">
+                                                                <select name="input_count" id="input_count">
+                                                                        <TMPL_LOOP NAME=select_input_count>
+                                                                                <option value='<TMPL_VAR NAME=COUNT>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT></option>
+                                                                        </TMPL_LOOP>
+                                                                </select>
+                                                                
+                                                        </td>
+                                                        <td width="20%">
+                                                                &nbsp;
+                                                        </td>
+                                                        <td width="25%" style="text-align: right;">
+                                                                <label id="output_count_label">Anzahl Ausgänge:</label>
+                                                        </td>
+                                                        <td width="15%" colspan="2">
+                                                                <select name="output_count" id="output_count">
+                                                                        <TMPL_LOOP NAME=SELECT_OUTPUT_COUNT>
+                                                                                <option value='<TMPL_VAR NAME=COUNT>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT></option>
+                                                                        </TMPL_LOOP>
+                                                                </select>                                                
+                                                        </td>  
+                                                </tr>
+                                            
+                                        </table>
+                                        <table class="formtable" border="0" width="100%">
+                                                <tr>
+                                                        <td width="40%">&nbsp</td>
+                                                        <td width="10%" colspan="2">
+                                                                <input id="submit" name="submit" type="reset" value="Abbrechen">
+                                                        </td>
+                                                        <td width="10%" colspan="2">
+                                                                <input id="submit" name="submit" type="submit" value="Speichern">
+                                                        </td>
+                                                        <td width="40%">&nbsp</td>
+                                                </tr> 
+                                        </table>  
+                                </div>
+                        </form>
+                        <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
+                        		<input type="hidden" id="saveIoConfig" name="saveIoConfig" value="saveIoConfig">
+                        		<div class="form-group">
+	                        <table class="formtable" border="0" width="100%">
+				                 <tr>
+				                 	<td width="50%" style="vertical-align: top;">
+				                 		<h2>Eingänge</h2>
+				                 		<table class="formtable" border="0" width="100%">
+				                 			<TMPL_LOOP NAME=number_of_inputs>
+				                 				<tr>
+				                 					<td width="50%" style="text-align: right;">Eingänge <TMPL_VAR NAME=current>:</td>
+				                 					<td width="50%">
+				                 						<input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
+				                 					</td>
+				                 				</tr>
+				                 			</TMPL_LOOP>
+				                 		</table>
+				                 	</td>
+				                 	<td width="50%" style="vertical-align: top;">
+				                 		<h2>Ausgänge</h2>
+				                 		<table class="formtable" border="0" width="100%">
+				                 			<TMPL_LOOP NAME=number_of_outputs>
+				                 				<tr>
+				                 					<td width="50%" style="text-align: right;">Ausgang <TMPL_VAR NAME=current>:</td>
+				                 					<td width="50%"><input type='text' id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
+				                 					</td>
+				                 				</tr>
+				                 			</TMPL_LOOP>
+				                 		</table>
+				                 	</td>
+				 
+				                 </tr>
+				           	</table>
+				           	<table class="formtable" border="0" width="100%">
+                                 <tr>
+                                         <td width="40%">&nbsp</td>
+                                         <td width="10%" colspan="2">
+                                                 <input id="submit2" name="submit2" type="reset" value="Abbrechen">
+                                         </td>
+                                         <td width="10%" colspan="2">
+                                                 <input id="submit2" name="submit2" type="submit" value="Speichern">
+                                         </td>
+                                         <td width="40%">&nbsp</td>
+                                 </tr> 
+                         	</table>  
+                        </div>
+                        </form>
+                 
+                 
+                     
+                </div>
+        </div>
+</div>
+
+
+
