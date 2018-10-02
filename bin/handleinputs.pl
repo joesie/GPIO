@@ -16,9 +16,10 @@ notify( $lbpplugindir, "daemon", "Start input handler daemon");
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 
+
 #endless loop
 while(1){
-	for($i=0;$i<$pcfg->param("gpios.inputCount");$i++){
+	for(my $i=0;$i<$pcfg->param("gpios.inputCount");$i++){
 		my $gpio= $pcfg->param("inputs.input$i");
 	    
 	    my $value = system("pigs modes $gpio r");
