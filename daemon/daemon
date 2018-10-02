@@ -21,6 +21,5 @@ fi
 $LBHOMEDIR/bin/plugins/io/inoutpinconfig.pl
 $LBHOMEDIR/bin/plugins/io/handleinputs.pl 
 
-# notify io daemon "The Sonos daemon has a communication problem." 
 
 exit 0
