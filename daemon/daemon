@@ -18,11 +18,10 @@ fi
 . $LBHOMEDIR/libs/bashlib/notify.sh
 
 # start daemon for pigpio
-result=systemctl enable pigpiod
-
-echo "Start daemon for PIGIO" $result
+systemctl enable pigpiod
 
 $LBHOMEDIR/bin/plugins/io/inoutpinconfig.pl
+$LBHOMEDIR/bin/plugins/io/handleinputs.pl 
 
 notify io daemon "The Sonos daemon has a communication problem." 
 

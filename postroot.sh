@@ -63,7 +63,7 @@ echo "<INFO> Plugin BIN folder is: $PBIN"
 echo "<info> Patch PGIO Daemon"
 cp -p -v ./sbin/pigpiod.service /lib/systemd/system/ 
 chmod 644 /lib/systemd/system/pigpiod.service 
-
+chmod 644 $LBHOMEDIR/bin/plugins/io/handleinputs.pl 
 
 
 # Exit with Status 0

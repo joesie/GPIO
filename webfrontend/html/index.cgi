@@ -16,9 +16,6 @@ my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 
 my $query = new CGI;
 
-
-
-
 my @names = $query->param;
 my $name;
 my $result = 0;
