@@ -9,6 +9,7 @@ use warnings;
 use strict;
 use LoxBerry::IO;
 use LoxBerry::Log;
+use Time::HiRes qw ( sleep );
 
 notify( $lbpplugindir, "daemon", "Start input handler daemon");
 
@@ -23,7 +24,7 @@ while(1){
 	    my $value = system("pigs modes $gpio r");
 	    notify( $lbpplugindir, "daemon", "Send value to ms $value");
 	    my $response;
-	    if(value == 1){
+	    if($value == 1){
 	    		$response = mshttp_send_mem(1, "input$i", "On");	
 	    } else {
 	    		$response = mshttp_send_mem(1, "input$i", "Off");
@@ -37,7 +38,7 @@ while(1){
 		}
 	}
 	
-	select(undef, undef, undef, 0.5);
+	sleep (0.1);
 }
 
 

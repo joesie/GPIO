@@ -65,6 +65,8 @@ cp -p -v ./sbin/pigpiod.service /lib/systemd/system/
 chmod 644 /lib/systemd/system/pigpiod.service 
 chmod 644 $LBHOMEDIR/bin/plugins/io/handleinputs.pl 
 
+#enable autostart 
+systemctl enable pigpiod
 
 # Exit with Status 0
 exit 0

@@ -17,12 +17,10 @@ fi
 
 . $LBHOMEDIR/libs/bashlib/notify.sh
 
-# start daemon for pigpio
-systemctl enable pigpiod
 
 $LBHOMEDIR/bin/plugins/io/inoutpinconfig.pl
 $LBHOMEDIR/bin/plugins/io/handleinputs.pl 
 
-notify io daemon "The Sonos daemon has a communication problem." 
+# notify io daemon "The Sonos daemon has a communication problem." 
 
 exit 0
