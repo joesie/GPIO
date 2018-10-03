@@ -50,7 +50,7 @@ if ( param('saveIoConfig') ) {
 	
 	$pcfg->save();
 	
-  	system($^X, "$home/bin/plugins/io/inoutpinconfig.pl");
+  	system($^X, "$lbpbindir/inoutpinconfig.pl");
   	
 }
 
