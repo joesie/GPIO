@@ -1,0 +1,23 @@
+.error{
+	color: red;
+}
+
+.error .ui-input-text input {
+	border-color: red;
+	border-width: 2px;
+	border-style: solid;
+}
+
+.maininfo{
+	text-align:center;
+	font-size: 1.3em;
+}
+
+.info.maininfo{
+	color: green;
+}
+
+.inputlabel{
+	text-align: right;
+}
+

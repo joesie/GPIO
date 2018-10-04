@@ -14,11 +14,31 @@ use IPC::System::Simple qw(system capture);
 my  $home = File::HomeDir->my_home;
 our  $psubfolder;
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
+my $message;
+my $messagetype;
+my %errormessages;
+
 
 
 # Figure out in which subfolder we are installed
 $psubfolder = abs_path($0);
 $psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
+
+##
+# validate Userdata 
+##
+sub validateGpioUserData{
+	my $value= $_[0];
+	
+	if ($value !~ /^\d+?$/) {
+		return "Nur Zahlen sind erlaubt";
+	}
+	
+	if($value > 27 || $value < 2){
+		return "Nur Werte zwischen 2 und 27 sind erlaubt!";
+	}
+	return "ok";
+}
 
 
 # Save settings
@@ -42,16 +62,31 @@ if ( param('saveIoConfig') ) {
 	for($currentInputCount=0; $currentInputCount< $pcfg->param("gpios.inputCount"); $currentInputCount++){
 		my $inputValue = param("input$currentInputCount");
 		$pcfg->param("inputs.input$currentInputCount", "$inputValue");
+		my $result = &validateGpioUserData($inputValue);
+		if($result ne("ok")){
+			$messagetype = "error";
+			$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
+			$errormessages{"inputs.input$currentInputCount"} = $result;
+		}
 	}
 	for( $currentOutputCount=0; $currentOutputCount< $pcfg->param("gpios.outputCount"); $currentOutputCount++){
 		my $outputValue = param("output$currentOutputCount");
 		$pcfg->param("outputs.output$currentOutputCount", "$outputValue");
+		my $result = &validateGpioUserData($outputValue);
+		if($result ne("ok")){
+			$messagetype = "error";
+			$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
+			$errormessages{"outputs.output$currentOutputCount"} = $result;
+		}
 	}
 	
-	$pcfg->save();
+	if($messagetype ne("error")){
+		$pcfg->save();
+  		system($^X, "$lbpbindir/inoutpinconfig.pl");
+  		$message = "Eingaben wurden erfolgreich gespeichert";
+  		$messagetype = "info";
+	}
 	
-  	system($^X, "$lbpbindir/inoutpinconfig.pl");
-  	
 }
 
 
@@ -84,7 +119,12 @@ sub createInputOutputConfig{
 
   for($i=0;$i<$_[0];$i++){
   	my $value= $pcfg->param("$_[1]$i");
-    push @result, {current=>$i,value =>$value};
+  	my $error = $errormessages{"$_[1]$i"};
+  	my $class = "info";;
+  	if($error ne ""){
+  		$class = "error";
+  	}
+    push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class};
   }
   return @result;
 }
@@ -96,6 +136,8 @@ sub createInputOutputConfig{
 #Set header for our side
 my $version = LoxBerry::System::pluginversion();
 my $plugintitle = "I/O";
+our $htmlhead = "<link rel='stylesheet' href='style.css'></link>";
+
 LoxBerry::Web::lbheader("$plugintitle $version", "http://www.loxwiki.eu/display/LOXBERRY/Any+Plugin", "help.html");
 
 #Load Template and fill with given parameters
@@ -110,6 +152,8 @@ my @outputConfigArray = &createInputOutputConfig($pcfg->param("gpios.outputCount
 $template->param("number_of_outputs" => \@outputConfigArray);
 my @inputConfigArray = &createInputOutputConfig($pcfg->param("gpios.inputCount"), "inputs.input");
 $template->param("number_of_inputs" => \@inputConfigArray);
+$template->param("MESSAGE" =>$message);
+$template->param("MESSAGETYPE" => $messagetype);
 
 
 # Write template

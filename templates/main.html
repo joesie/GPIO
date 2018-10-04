@@ -1,6 +1,7 @@
 <div role=\ "main\" class=\ "ui-content\">
         <div class=\ "ui-body ui-body-a ui-corner-all loxberry-logo\">
                 <div style=\ "margin: 5%;\">
+                			<p class= "<TMPL_VAR NAME=MESSAGETYPE> maininfo"><TMPL_VAR NAME=MESSAGE></p>
                         <h2>Einstellungen</h2>
                         <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi" style="border-bottom: 2px ridge #cdcdcd">
                                 <input type="hidden" id="saveCount" name="saveCount" value="saveCount">
@@ -58,9 +59,10 @@
 				                 		<table class="formtable" border="0" width="100%">
 				                 			<TMPL_LOOP NAME=number_of_inputs>
 				                 				<tr>
-				                 					<td width="50%" style="text-align: right;">Eingänge <TMPL_VAR NAME=current>:</td>
-				                 					<td width="50%">
+				                 					<td width="50%" class= "<TMPL_VAR NAME=class> inputlabel">Eingänge <TMPL_VAR NAME=current>:</td>
+				                 					<td width="50%" class= "<TMPL_VAR NAME=class>">
 				                 						<input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
+				                 						<p><TMPL_VAR NAME=errormessage></p>
 				                 					</td>
 				                 				</tr>
 				                 			</TMPL_LOOP>
@@ -71,8 +73,10 @@
 				                 		<table class="formtable" border="0" width="100%">
 				                 			<TMPL_LOOP NAME=number_of_outputs>
 				                 				<tr>
-				                 					<td width="50%" style="text-align: right;">Ausgang <TMPL_VAR NAME=current>:</td>
-				                 					<td width="50%"><input type='text' id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
+				                 					<td width="50%" class= "<TMPL_VAR NAME=class> inputlabel">Ausgang <TMPL_VAR NAME=current>:</td>
+				                 					<td width="50%" class= "<TMPL_VAR NAME=class>">
+				                 						<input type='text' id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
+				                 						<p><TMPL_VAR NAME=errormessage></p>
 				                 					</td>
 				                 				</tr>
 				                 			</TMPL_LOOP>
