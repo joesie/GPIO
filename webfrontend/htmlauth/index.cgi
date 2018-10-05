@@ -11,8 +11,6 @@ use strict;
 
 use IPC::System::Simple qw(system capture);
 
-my  $home = File::HomeDir->my_home;
-our  $psubfolder;
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $message;
 my $messagetype;
@@ -20,15 +18,16 @@ my %errormessages;
 
 
 
-# Figure out in which subfolder we are installed
-$psubfolder = abs_path($0);
-$psubfolder =~ s/(.*)\/(.*)\/(.*)$/$2/g;
 
 ##
 # validate Userdata 
 ##
 sub validateGpioUserData{
 	my $value= $_[0];
+	
+	if($value eq("")){
+		return "Feld darf nicht leer sein!";
+	}
 	
 	if ($value !~ /^\d+?$/) {
 		return "Nur Zahlen sind erlaubt";
@@ -138,7 +137,7 @@ my $version = LoxBerry::System::pluginversion();
 my $plugintitle = "I/O";
 our $htmlhead = "<link rel='stylesheet' href='style.css'></link>";
 
-LoxBerry::Web::lbheader("$plugintitle $version", "http://www.loxwiki.eu/display/LOXBERRY/Any+Plugin", "help.html");
+LoxBerry::Web::lbheader("$plugintitle $version", "https://www.loxwiki.eu/pages/viewpage.action?pageId=39355014", "help.html");
 
 #Load Template and fill with given parameters
 my $template = HTML::Template->new(filename => "$lbptemplatedir/main.html");

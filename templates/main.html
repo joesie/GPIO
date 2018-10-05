@@ -3,7 +3,10 @@
                 <div style=\ "margin: 5%;\">
                 			<p class= "<TMPL_VAR NAME=MESSAGETYPE> maininfo"><TMPL_VAR NAME=MESSAGE></p>
                         <h2>Einstellungen</h2>
-                        <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi" style="border-bottom: 2px ridge #cdcdcd">
+                        <div>
+                        		<p>In diesem Bereich bitte die korrekte Anzahl der benötigten Ein- und Ausgänge angeben. Nach dem speichern wird die Kanalkonfiguration angepasst </p>
+                        </div>
+                        <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi" class="separatingline">
                                 <input type="hidden" id="saveCount" name="saveCount" value="saveCount">
                                 <div class="form-group">
                                         <table class="formtable" border="0" width="100%">
@@ -35,6 +38,8 @@
                                                 </tr>
                                             
                                         </table>
+                                        
+                                        
                                         <table class="formtable" border="0" width="100%">
                                                 <tr>
                                                         <td width="40%">&nbsp</td>
@@ -49,14 +54,23 @@
                                         </table>  
                                 </div>
                         </form>
+                        <h2>Kanalkonfiguration</h2>
+                        <div>
+                        		<p>Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen. 
+                        		In das Eingabefeld wird hierfür für jeden Kanal des verwendete GPIO Anschluss eingetragen. Die GPIO Pin Belegung kann <a href="https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm">hier</a> nachgelesen werden.</p>
+                        </div>
                         <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
                         		<input type="hidden" id="saveIoConfig" name="saveIoConfig" value="saveIoConfig">
                         		<div class="form-group">
 	                        <table class="formtable" border="0" width="100%">
 				                 <tr>
 				                 	<td width="50%" style="vertical-align: top;">
-				                 		<h2>Eingänge</h2>
+				                 		<h2 class="tableheadline">Eingänge</h2>
 				                 		<table class="formtable" border="0" width="100%">
+				                 			<tr>
+				                 				<td></td>
+				                 				<td>GPIO Nummer</td>
+				                 			</tr>
 				                 			<TMPL_LOOP NAME=number_of_inputs>
 				                 				<tr>
 				                 					<td width="50%" class= "<TMPL_VAR NAME=class> inputlabel">Eingänge <TMPL_VAR NAME=current>:</td>
@@ -69,8 +83,12 @@
 				                 		</table>
 				                 	</td>
 				                 	<td width="50%" style="vertical-align: top;">
-				                 		<h2>Ausgänge</h2>
+				                 		<h2 class="tableheadline">Ausgänge</h2>
 				                 		<table class="formtable" border="0" width="100%">
+				                 			<tr>
+				                 				<td></td>
+				                 				<td>GPIO Nummer</td>
+				                 			</tr>
 				                 			<TMPL_LOOP NAME=number_of_outputs>
 				                 				<tr>
 				                 					<td width="50%" class= "<TMPL_VAR NAME=class> inputlabel">Ausgang <TMPL_VAR NAME=current>:</td>

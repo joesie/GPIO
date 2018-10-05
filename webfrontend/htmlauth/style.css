@@ -21,3 +21,12 @@
 	text-align: right;
 }
 
+.separatingline{
+	border-bottom: 2px ridge #cdcdcd;
+}
+
+.tableheadline {
+	text-align: center;
+}
+
+
