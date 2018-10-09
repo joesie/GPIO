@@ -56,3 +56,10 @@ echo "<INFO> Plugin Template folder is: $PTEMPL"
 echo "<INFO> Plugin Data folder is: $PDATA"
 echo "<INFO> Plugin Log folder (on RAMDISK!) is: $PLOG"
 echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
+
+echo "<INFO> Creating temporary folders for upgrading"
+mkdir /tmp/$ARGV1\_upgrade
+mkdir /tmp/$ARGV1\_upgrade/config
+
+echo "<INFO> Backing up existing config files"
+cp -v -r $ARGV5/config/plugins/$ARGV3/ /tmp/$ARGV1\_upgrade/config

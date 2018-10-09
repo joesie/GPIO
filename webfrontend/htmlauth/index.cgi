@@ -134,7 +134,7 @@ sub createInputOutputConfig{
 
 #Set header for our side
 my $version = LoxBerry::System::pluginversion();
-my $plugintitle = "I/O";
+my $plugintitle = "GPIO";
 our $htmlhead = "<link rel='stylesheet' href='style.css'></link>";
 
 LoxBerry::Web::lbheader("$plugintitle $version", "https://www.loxwiki.eu/pages/viewpage.action?pageId=39355014", "help.html");

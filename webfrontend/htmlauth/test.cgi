@@ -27,7 +27,7 @@ use LoxBerry::Log;
 
 #Set header for our side
 my $version = LoxBerry::System::pluginversion();
-my $plugintitle = "I/O";
+my $plugintitle = "GPIO";
 LoxBerry::Web::lbheader("$plugintitle $version", "http://www.loxwiki.eu/display/LOXBERRY/Any+Plugin", "help.html");
 
 
