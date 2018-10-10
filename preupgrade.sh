@@ -45,17 +45,15 @@ PCONFIG=$LBPCONFIG/$PDIR
 PSBIN=$LBPSBIN/$PDIR
 PBIN=$LBPBIN/$PDIR
 
-echo "<INFO> Command is: $COMMAND"
-echo "<INFO> Temporary folder is: $TEMPDIR"
-echo "<INFO> (Short) Name is: $PSHNAME"
-echo "<INFO> Installation folder is: $ARGV3"
-echo "<INFO> Plugin version is: $ARGV4"
-echo "<INFO> Plugin CGI folder is: $PCGI"
-echo "<INFO> Plugin HTML folder is: $PHTML"
-echo "<INFO> Plugin Template folder is: $PTEMPL"
-echo "<INFO> Plugin Data folder is: $PDATA"
-echo "<INFO> Plugin Log folder (on RAMDISK!) is: $PLOG"
-echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
+ARGV1=$1 # First argument is temp folder during install
+# echo "<INFO> Temporary folder is: $ARGV1"
+
+ARGV3=$3 # Third argument is Plugin installation folder
+# echo "<INFO> Installation folder is: $ARGV3"
+
+ARGV5=$5 # Fifth argument is Base folder of LoxBerry
+# echo "<INFO> Base folder is: $ARGV5"
+
 
 echo "<INFO> Creating temporary folders for upgrading"
 mkdir /tmp/$ARGV1\_upgrade

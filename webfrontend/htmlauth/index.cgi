@@ -79,6 +79,12 @@ if ( param('saveIoConfig') ) {
 		}
 	}
 	
+	
+	$pcfg->param("inputs.prefix", param('input_prefix'));
+  	$pcfg->param("inputs.inputsamplingrate", param('input_samplingrate'));
+  
+	
+	
 	if($messagetype ne("error")){
 		$pcfg->save();
   		system($^X, "$lbpbindir/inoutpinconfig.pl");
@@ -153,6 +159,12 @@ my @inputConfigArray = &createInputOutputConfig($pcfg->param("gpios.inputCount")
 $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
+$template->param("input_prefix" => $pcfg->param("inputs.prefix"));
+$template->param("input_samplingrate" => $pcfg->param("inputs.inputsamplingrate"));
+
+
+
+
 
 
 # Write template

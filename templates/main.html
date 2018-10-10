@@ -80,7 +80,23 @@
 				                 					</td>
 				                 				</tr>
 				                 			</TMPL_LOOP>
-				                 		</table>
+				                 			<tr><td colspan=2><p>Allgemeine Einstellungen</td></tr>
+				                 			<tr>
+				                 				<td class= "<TMPL_VAR NAME=class> inputlabel">Präfix:</td>
+				                 				<td><input type='text' id="input_prefix" name="input_prefix" value="<TMPL_VAR input_prefix>"></input></td>
+				                 			</tr>
+				                 			<tr><td colspan=2><p class="help">Der Präfix dient bei Verwendung mehrerer Loxberrys mit diesem Plugin, die Eingänge dem Gerät zuzuordnen</p> </td></tr>
+				                 			<tr>
+				                 				<td class= "<TMPL_VAR NAME=class> inputlabel">Abtastintervall:</td>
+				                 				<td><input type='text' id="input_samplingrate" name="input_samplingrate" value="<TMPL_VAR input_samplingrate>"></input></td>
+				                 			</tr>
+				                 			<tr><td colspan=2> <p class="help">Das Abtastintervall sollte immer halb so lang sein, wie die Signallänge, die am Eingang minimal anliegt. Nur so ist gewährleistet, dass der Wert zuverlässig gelesen werden kann. Doch Achtung: ein kurzes Intervall führt zu einer strken
+				                 				Belastung des Prozessors.</p></td></tr>
+				                 			
+				                 			
+			                 			</table>
+				                
+				                 		
 				                 	</td>
 				                 	<td width="50%" style="vertical-align: top;">
 				                 		<h2 class="tableheadline">Ausgänge</h2>
