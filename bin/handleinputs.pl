@@ -11,9 +11,9 @@ use LoxBerry::IO;
 use LoxBerry::Log;
 use Time::HiRes qw ( sleep );
 
-my $log = Loxberry::Log::new(name => 'Input handler');
+# my $log = Loxberry::Log::new(name => 'Input_handler');
 
-LOGSTART("Daemon gestartet");
+# LOGSTART("Daemon gestartet");
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 
@@ -23,20 +23,19 @@ while(1){
 	for(my $i=0;$i<$pcfg->param("gpios.inputCount");$i++){
 		my $gpio= $pcfg->param("inputs.input$i");
 	    
-	    my $value = system("pigs modes $gpio r");
-	    notify( $lbpplugindir, "daemon", "Send value to ms $value");
+	    my $value = system("pigs r $gpio");
 	    my $response;
 	    if($value == 1){
 	    		$response = LoxBerry::IO::mshttp_send_mem(1, "input$i", "On");	
 	    } else {
 	    		$response = LoxBerry::IO::mshttp_send_mem(1, "input$i", "Off");
 	    }
-	    LOGDEB "Response: $response value: $value";
+	   # LOGDEB "Response: $response value: $value";
 	    
 		if (! $response) {
-		    LOGDEB "Error sending to Miniserver";
+#		    LOGDEB "Error sending to Miniserver";
 		} else {
-		    LOGDEB "Send ok";
+#		    LOGDEB "Send ok";
 		}
 	}
 	
@@ -44,10 +43,10 @@ while(1){
 }
 
 exit;
-END
-{
-    if ($log) {
-        $log->LOGEND;
-    }
-}
+#END
+#{
+#    if ($log) {
+#        $log->LOGEND;
+#    }
+#}
 

@@ -11,11 +11,13 @@ then
     /usr/bin/logger "This is just a sample DAEMON script from Sample Plugin"
 fi
 
-. $LBHOMEDIR/libs/bashlib/notify.sh
+#. $LBHOMEDIR/libs/bashlib/notify.sh
+. $LBHOMEDIR/libs/bashlib/loxberry_log.sh
 
 
-$LBHOMEDIR/bin/plugins/io/inoutpinconfig.pl
-$LBHOMEDIR/bin/plugins/io/handleinputs.pl 
+
+$LBHOMEDIR/bin/plugins/gpio/inoutpinconfig.pl
+$LBHOMEDIR/bin/plugins/gpio/handleinputs.pl 
 
 
 exit 0

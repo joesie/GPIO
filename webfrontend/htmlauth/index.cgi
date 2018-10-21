@@ -10,14 +10,22 @@ use warnings;
 use strict;
 
 use IPC::System::Simple qw(system capture);
+use LoxBerry::Log;
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $message;
 my $messagetype;
 my %errormessages;
 
+my $cgi = CGI->new;
+$cgi->import_names('R');
 
 
+  
+# Create a logging object
+my $log = LoxBerry::Log->new ( name => 'GPIO_Index' );
+
+LOGSTART("Daemon gestartet");
 
 ##
 # validate Userdata 
@@ -49,7 +57,7 @@ if ( param('saveCount') ) {
   $pcfg->param("gpios.outputCount", "$outputCount");
   
   $pcfg->save();
-  
+  LOGINF "Save Settings";
 }
 
 
@@ -82,11 +90,14 @@ if ( param('saveIoConfig') ) {
 	
 	$pcfg->param("inputs.prefix", param('input_prefix'));
   	$pcfg->param("inputs.inputsamplingrate", param('input_samplingrate'));
+  	$pcfg->param("MAIN.MINISERVER", param('selMiniServer'));
+  
   
 	
 	
 	if($messagetype ne("error")){
 		$pcfg->save();
+		LOGINF "Save Config";
   		system($^X, "$lbpbindir/inoutpinconfig.pl");
   		$message = "Eingaben wurden erfolgreich gespeichert";
   		$messagetype = "info";
@@ -134,6 +145,39 @@ sub createInputOutputConfig{
   return @result;
 }
 
+# ---------------------------------------------------
+# Control for "selMiniServer" Dropdown
+# ---------------------------------------------------
+ 
+my %miniservers = LoxBerry::System::get_miniservers();
+my @miniserverarray;
+my %miniserverhash;
+
+foreach my $ms (sort keys %miniservers)
+{
+    push @miniserverarray, "MINISERVER$ms";
+    $miniserverhash{"MINISERVER$ms"} = $miniservers{$ms}{Name};
+
+}
+ 
+my $selMiniServer = $cgi->popup_menu(
+      -name    => 'selMiniServer',
+      -values  => \@miniserverarray,
+      -labels  => \%miniserverhash,
+      -default => $pcfg->param('MAIN.MINISERVER'),
+  );
+ 
+# ---------------------------------------------------
+# Control for "samplingrate" Dropdown
+# ---------------------------------------------------
+my $samplingrate = $cgi->popup_menu(
+      -name    => 'samplingrate',
+      -values  => {'0.05','0.1','0.25','0.5','1'},
+      -labels  => {'0.05'=>'50ms','0.1'=>'100ms','0.25'=>'250ms','0.5'=>'500ms','1'=>'1s'},
+      -default => $pcfg->param('inputs.inputsamplingrate'),
+  );
+
+
 ##
 #handle Template and render index page
 ##
@@ -160,17 +204,29 @@ $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
 $template->param("input_prefix" => $pcfg->param("inputs.prefix"));
-$template->param("input_samplingrate" => $pcfg->param("inputs.inputsamplingrate"));
+$template->param("input_samplingrate" => $samplingrate);
 
+$template->param( "selMiniServer" => $selMiniServer );
 
-
-
+LOGINF "Render side";
 
 
 # Write template
 print $template->output();
 
+print LoxBerry::Web::logfile_button_html( NAME => 'Input_handler' );
+
+print LoxBerry::Web::logfile_button_html( NAME => 'GPIO_Config' );
+
+print LoxBerry::Web::logfile_button_html( NAME => 'GPIO_Index' );
+
 # set footer for our side
 LoxBerry::Web::lbfooter();
 
 exit;
+END
+{
+    if ($log) {
+        $log->LOGEND;
+    }
+}
