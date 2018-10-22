@@ -23,18 +23,14 @@ while(1){
 	for(my $i=0;$i<$pcfg->param("gpios.inputCount");$i++){
 		my $gpio= $pcfg->param("inputs.input$i");
 	    
-	    my $value = system("pigs r $gpio");
-	    
-	    print("Value: $value\n");
+	    my $value = qx {pigs r $gpio};
 	    
 	    my $response;
 	    if($value == 0){
-	    		print ("send Off\n");
-	    		$response = LoxBerry::IO::mshttp_send(1, "input$i", "Off");
+	    		$response = LoxBerry::IO::mshttp_send_mem(1, "input$i", "Off");
 	    			
 	    } else {
-	    		print ("send On\n");
-	    		$response = LoxBerry::IO::mshttp_send(1, "input$i", "On");
+	    		$response = LoxBerry::IO::mshttp_send_mem(1, "input$i", "On");
 	    }
 	   # LOGDEB "Response: $response value: $value";
 	    
@@ -45,7 +41,7 @@ while(1){
 		}
 	}
 	
-	sleep (0.5);
+	sleep (0.1);
 }
 
 exit;
