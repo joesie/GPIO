@@ -4,9 +4,9 @@
 # and files in /etc/cron.d. These files also have username fields,
 # that none of the other crontabs do.
 
-MAILTO=""
-SHELL=/bin/sh
-PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+#MAILTO=""
+#SHELL=/bin/sh
+#PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 # m h dom mon dow user  command
-0   *  * * *   loxberry        echo "Do something funny" > /dev/null 2>&1
+#0   *  * * *   loxberry        echo "Do something funny" > /dev/null 2>&1
