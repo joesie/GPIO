@@ -16,6 +16,8 @@ my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $message;
 my $messagetype;
 my %errormessages;
+my $inputPrefixErrorMessage;
+my $inputPrefixErrorClass;
 
 my $cgi = CGI->new;
 $cgi->import_names('R');
@@ -72,7 +74,6 @@ if ( param('saveIoConfig') ) {
 		my $result = &validateGpioUserData($inputValue);
 		if($result ne("ok")){
 			$messagetype = "error";
-			$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
 			$errormessages{"inputs.input$currentInputCount"} = $result;
 		}
 	}
@@ -82,12 +83,15 @@ if ( param('saveIoConfig') ) {
 		my $result = &validateGpioUserData($outputValue);
 		if($result ne("ok")){
 			$messagetype = "error";
-			$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
 			$errormessages{"outputs.output$currentOutputCount"} = $result;
 		}
 	}
-	
-	
+	my $input_prefixLength=length(param('input_prefix'));
+	if($input_prefixLength <=0){
+		$messagetype = "error";
+		$inputPrefixErrorMessage = "Das Feld darf nicht leer sein!";
+		$inputPrefixErrorClass = "error";
+	}
 	$pcfg->param("inputs.prefix", param('input_prefix'));
   	$pcfg->param("inputs.inputsamplingrate", param('input_samplingrate'));
   	$pcfg->param("MAIN.MINISERVER", param('selMiniServer'));
@@ -101,6 +105,8 @@ if ( param('saveIoConfig') ) {
   		system($^X, "$lbpbindir/inoutpinconfig.pl");
   		$message = "Eingaben wurden erfolgreich gespeichert";
   		$messagetype = "info";
+	} else{
+		$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
 	}
 	
 }
@@ -164,7 +170,7 @@ my $selMiniServer = $cgi->popup_menu(
       -name    => 'selMiniServer',
       -values  => \@miniserverarray,
       -labels  => \%miniserverhash,
-      -default => $pcfg->param('MAIN.MINISERVER'),
+      -default => $pcfg->param('MAIN.DEFAULT.MINISERVER'),
   );
  
 # ---------------------------------------------------
@@ -174,7 +180,7 @@ my $samplingrate = $cgi->popup_menu(
       -name    => 'samplingrate',
       -values  => {'0.05','0.1','0.25','0.5','1'},
       -labels  => {'0.05'=>'50ms','0.1'=>'100ms','0.25'=>'250ms','0.5'=>'500ms','1'=>'1s'},
-      -default => $pcfg->param('inputs.inputsamplingrate'),
+      -default => $pcfg->param('INPUTS.INPUTSAMPLINGRATERATE'),
   );
 
 
@@ -204,6 +210,8 @@ $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
 $template->param("input_prefix" => $pcfg->param("inputs.prefix"));
+$template->param("input_prefix_error_message" => $inputPrefixErrorMessage);
+$template->param("input_prefix_error_class" => $inputPrefixErrorClass);
 $template->param("input_samplingrate" => $samplingrate);
 
 $template->param( "selMiniServer" => $selMiniServer );

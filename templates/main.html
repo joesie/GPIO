@@ -82,8 +82,11 @@
 				                 			</TMPL_LOOP>
 				                 			<tr><td colspan=2><p>Allgemeine Einstellungen</td></tr>
 				                 			<tr>
-				                 				<td class= "<TMPL_VAR NAME=class> inputlabel">Präfix:</td>
-				                 				<td><input type='text' id="input_prefix" name="input_prefix" value="<TMPL_VAR input_prefix>"></input></td>
+				                 				<td class= "<TMPL_VAR NAME=input_prefix_error_class> inputlabel">Präfix:</td>
+				                 				<td class= "<TMPL_VAR NAME=input_prefix_error_class>">
+				                 					<input type='text' id="input_prefix" name="input_prefix" value="<TMPL_VAR input_prefix>"></input>
+				                 					<p><TMPL_VAR NAME=input_prefix_error_message></p>
+				                 					</td>
 				                 			</tr>
 				                 			<tr><td colspan=2><p class="help">Der Präfix dient bei Verwendung mehrerer Loxberrys mit diesem Plugin, die Eingänge dem Gerät zuzuordnen</p> </td></tr>
 				                 			<tr>
