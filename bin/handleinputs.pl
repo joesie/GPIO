@@ -11,9 +11,11 @@ use LoxBerry::IO;
 use LoxBerry::Log;
 use Time::HiRes qw ( sleep );
 
-# my $log = Loxberry::Log::new(name => 'Input_handler');
+my $log = LoxBerry::Log->new(name => 'Input_handler',);
 
-# LOGSTART("Daemon gestartet");
+
+
+LOGSTART("starts Handle input daemon");
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 
@@ -32,12 +34,11 @@ while(1){
 	    } else {
 	    		$response = LoxBerry::IO::mshttp_send_mem(1, "input$i", "On");
 	    }
-	   # LOGDEB "Response: $response value: $value";
 	    
 		if (! $response) {
-#		    LOGDEB "Error sending to Miniserver";
+		    LOGERR "Error sending to Miniserver";
 		} else {
-#		    LOGDEB "Send ok";
+		    LOGDEB "Send ok Input$i: $value";
 		}
 	}
 	
@@ -45,10 +46,10 @@ while(1){
 }
 
 exit;
-#END
-#{
-#    if ($log) {
-#        $log->LOGEND;
-#    }
-#}
+END
+{
+    if ($log) {
+        $log->LOGEND;
+    }
+}
 
