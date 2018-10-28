@@ -19,8 +19,17 @@ LOGSTART("Handle input daemon");
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $prefix = $pcfg->param("inputs.prefix");
+my $msno = LoxBerry::System::get_miniserver_by_name($pcfg->param("MAIN.MINISERVER"));
 
-LOGERR "$prefix";
+
+LOGDEB "Congigured prefix: $prefix";
+LOGDEB "Configured Miniserver: $msno";
+
+if(!$msno){
+	LOGERR "No Miniserver configured!";
+	LOGERR "Script stopped";
+	exit 0;
+}
 
 #endless loop
 while(1){
@@ -31,14 +40,13 @@ while(1){
 	    
 	    my $response;
 	    if($value == 0){
-	    		$response = LoxBerry::IO::mshttp_send_mem(1, "$prefix$i", "Off");
-	    			
+	    		$response = LoxBerry::IO::mshttp_send_mem($msno, "$prefix$i", "Off");	    			
 	    } else {
-	    		$response = LoxBerry::IO::mshttp_send_mem(1, "$prefix$i", "On");
+	    		$response = LoxBerry::IO::mshttp_send_mem($msno, "$prefix$i", "On");
 	    }
 	    
 		if (! $response) {
-		    LOGERR "Error sending to Miniserver $response";
+		    LOGERR "Error sending to Miniserver";
 		} else {
 		    LOGDEB "Send ok $prefix$i: $value";
 		}
