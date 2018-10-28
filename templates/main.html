@@ -92,7 +92,12 @@
 				                 			<tr>
 				                 				<td class= "<TMPL_VAR NAME=class> inputlabel">Abtastintervall:</td>
 				                 				<td>
-				                 					<TMPL_VAR input_samplingrate>
+				                 					<select name="input_samplingrate" id="input_samplingrate">
+                                                          <TMPL_LOOP NAME=input_samplingrate>
+                                                                  <option value='<TMPL_VAR NAME=VALUE>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=LABEL></option>
+                                                          </TMPL_LOOP>
+                                                     </select>
+				                 					
 				                 				</td>
 				                 			</tr>
 				                 			<tr><td colspan=2> <p class="help">Das Abtastintervall sollte immer halb so lang sein, wie die Signallänge, die am Eingang minimal anliegt. Nur so ist gewährleistet, dass der Wert zuverlässig gelesen werden kann. Doch Achtung: ein kurzes Intervall führt zu einer strken

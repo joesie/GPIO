@@ -18,12 +18,17 @@ my $log = LoxBerry::Log->new(name => 'Input_handler',);
 LOGSTART("Handle input daemon");
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
-my $prefix = $pcfg->param("inputs.prefix");
+my $prefix = $pcfg->param("INPUTS.PREFIX");
+my $samplingRate = $pcfg->param("INPUTS.INPUTSAMPLINGRATERATE");
 my $msno = LoxBerry::System::get_miniserver_by_name($pcfg->param("MAIN.MINISERVER"));
 
+my $ms = $pcfg->param("MAIN.MINISERVER");
 
 LOGDEB "Congigured prefix: $prefix";
-LOGDEB "Configured Miniserver: $msno";
+LOGDEB "Configured miniserver: $ms";
+LOGDEB "Configured no. of miniserver: $msno";
+LOGDEB "Congigured sampling rate: $samplingRate";
+
 
 if(!$msno){
 	LOGERR "No Miniserver configured!";
@@ -34,7 +39,7 @@ if(!$msno){
 #endless loop
 while(1){
 	for(my $i=0;$i<$pcfg->param("gpios.inputCount");$i++){
-		my $gpio= $pcfg->param("inputs.input$i");
+		my $gpio= $pcfg->param("INPUTS.INPUT$i");
 	    
 	    my $value = qx {pigs r $gpio};
 	    
@@ -56,7 +61,7 @@ while(1){
 	if($log->loglevel() >3){
 		sleep(1);
 	} else {
-		sleep (0.1);
+		sleep ($samplingRate);
 	}
 	
 }

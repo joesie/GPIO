@@ -70,7 +70,7 @@ if ( param('saveIoConfig') ) {
 	
 	for($currentInputCount=0; $currentInputCount< $pcfg->param("gpios.inputCount"); $currentInputCount++){
 		my $inputValue = param("input$currentInputCount");
-		$pcfg->param("inputs.input$currentInputCount", "$inputValue");
+		$pcfg->param("INPUTS.INPUT$currentInputCount", "$inputValue");
 		my $result = &validateGpioUserData($inputValue);
 		if($result ne("ok")){
 			$messagetype = "error";
@@ -92,12 +92,11 @@ if ( param('saveIoConfig') ) {
 		$inputPrefixErrorMessage = "Das Feld darf nicht leer sein!";
 		$inputPrefixErrorClass = "error";
 	}
-	$pcfg->param("inputs.prefix", param('input_prefix'));
-  	$pcfg->param("inputs.inputsamplingrate", param('input_samplingrate'));
+	$pcfg->param("INPUTS.PREFIX", param('input_prefix'));
+  	$pcfg->param("INPUTS.INPUTSAMPLINGRATERATE", param('input_samplingrate'));
   	$pcfg->param("MAIN.MINISERVER", param('selMiniServer'));
   
   
-	
 	
 	if($messagetype ne("error")){
 		$pcfg->save();
@@ -131,6 +130,33 @@ sub createSelectArray{
   return @result;
 }
 
+# ---------------------------------------------------
+# Control for "samplingrate" Dropdown
+# ---------------------------------------------------
+sub samplingRates{
+  	my @result;
+  	my @values  = (0.05,0.1,0.25,0.5);
+
+
+	my $default = $pcfg->param("INPUTS.INPUTSAMPLINGRATERATE");
+	my $selected = "";
+	
+	foreach my $value (@values) {
+   		$selected = "";
+   		if($value == $default){
+   			$selected = 'selected';
+   		}
+   		my $label = $value * 1000; 
+   		push @result, {VALUE=>$value, LABEL=>"$label ms" ,CHOOSED=>$selected};
+	}
+	if(1 == $default){
+   		$selected = 'selected';
+    }
+  	push @result, {VALUE=>1, LABEL=>"1s" ,CHOOSED=>$selected};
+  	
+  	return @result;
+}
+
 ##
 # Parameter for I/O config
 # @Parameter: first: number of inputs or outputs, second: the string to configfile for stored value
@@ -161,7 +187,7 @@ my %miniserverhash;
 
 foreach my $ms (sort keys %miniservers)
 {
-    push @miniserverarray, "MINISERVER$ms";
+    push @miniserverarray, $miniservers{$ms}{Name};
     $miniserverhash{"MINISERVER$ms"} = $miniservers{$ms}{Name};
 
 }
@@ -169,20 +195,10 @@ foreach my $ms (sort keys %miniservers)
 my $selMiniServer = $cgi->popup_menu(
       -name    => 'selMiniServer',
       -values  => \@miniserverarray,
-      -labels  => \%miniserverhash,
+     # -labels  => \%miniserverhash,
       -default => $pcfg->param('MAIN.DEFAULT.MINISERVER'),
   );
  
-# ---------------------------------------------------
-# Control for "samplingrate" Dropdown
-# ---------------------------------------------------
-my $samplingrate = $cgi->popup_menu(
-      -name    => 'samplingrate',
-      -values  => {'0.05','0.1','0.25','0.5','1'},
-      -labels  => {'0.05'=>'50ms','0.1'=>'100ms','0.25'=>'250ms','0.5'=>'500ms','1'=>'1s'},
-      -default => $pcfg->param('INPUTS.INPUTSAMPLINGRATERATE'),
-  );
-
 
 ##
 #handle Template and render index page
@@ -205,14 +221,16 @@ $template->param("select_input_count" => \@inputSelectArray);
 
 my @outputConfigArray = &createInputOutputConfig($pcfg->param("gpios.outputCount"), "outputs.output");
 $template->param("number_of_outputs" => \@outputConfigArray);
-my @inputConfigArray = &createInputOutputConfig($pcfg->param("gpios.inputCount"), "inputs.input");
+my @inputConfigArray = &createInputOutputConfig($pcfg->param("gpios.inputCount"), "INPUTS.INPUT");
 $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
-$template->param("input_prefix" => $pcfg->param("inputs.prefix"));
+$template->param("input_prefix" => $pcfg->param("INPUTS.PREFIX"));
 $template->param("input_prefix_error_message" => $inputPrefixErrorMessage);
 $template->param("input_prefix_error_class" => $inputPrefixErrorClass);
-$template->param("input_samplingrate" => $samplingrate);
+
+my @samplingRates = &samplingRates();
+$template->param("input_samplingrate" => \@samplingRates);
 
 $template->param( "selMiniServer" => $selMiniServer );
 
