@@ -10,7 +10,6 @@ use warnings;
 use strict;
 
 use IPC::System::Simple qw(system capture);
-use LoxBerry::Log;
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $message;
@@ -21,13 +20,6 @@ my $inputPrefixErrorClass;
 
 my $cgi = CGI->new;
 $cgi->import_names('R');
-
-
-  
-# Create a logging object
-my $log = LoxBerry::Log->new ( name => 'GPIO_Index' );
-
-LOGSTART("Daemon gestartet");
 
 ##
 # validate Userdata 
@@ -59,7 +51,6 @@ if ( param('saveCount') ) {
   $pcfg->param("gpios.outputCount", "$outputCount");
   
   $pcfg->save();
-  LOGINF "Save Settings";
 }
 
 
@@ -100,7 +91,6 @@ if ( param('saveIoConfig') ) {
 	
 	if($messagetype ne("error")){
 		$pcfg->save();
-		LOGINF "Save Config";
   		system($^X, "$lbpbindir/inoutpinconfig.pl");
   		$message = "Eingaben wurden erfolgreich gespeichert";
   		$messagetype = "info";
@@ -187,15 +177,15 @@ my %miniserverhash;
 
 foreach my $ms (sort keys %miniservers)
 {
-    push @miniserverarray, $miniservers{$ms}{Name};
-    $miniserverhash{"MINISERVER$ms"} = $miniservers{$ms}{Name};
+    push @miniserverarray, "$ms";
+    $miniserverhash{"$ms"} = $miniservers{$ms}{Name};
 
 }
  
 my $selMiniServer = $cgi->popup_menu(
       -name    => 'selMiniServer',
       -values  => \@miniserverarray,
-     # -labels  => \%miniserverhash,
+      -labels  => \%miniserverhash,
       -default => $pcfg->param('MAIN.DEFAULT.MINISERVER'),
   );
  
@@ -234,25 +224,12 @@ $template->param("input_samplingrate" => \@samplingRates);
 
 $template->param( "selMiniServer" => $selMiniServer );
 
-LOGINF "Render side";
-
-
 # Write template
 print $template->output();
 
 print LoxBerry::Web::logfile_button_html( NAME => 'Input_handler' );
 
-print LoxBerry::Web::logfile_button_html( NAME => 'GPIO_Config' );
-
-print LoxBerry::Web::logfile_button_html( NAME => 'GPIO_Index' );
-
 # set footer for our side
 LoxBerry::Web::lbfooter();
 
 exit;
-END
-{
-    if ($log) {
-        $log->LOGEND;
-    }
-}

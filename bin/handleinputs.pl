@@ -20,12 +20,10 @@ LOGSTART("Handle input daemon");
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $prefix = $pcfg->param("INPUTS.PREFIX");
 my $samplingRate = $pcfg->param("INPUTS.INPUTSAMPLINGRATERATE");
-my $msno = LoxBerry::System::get_miniserver_by_name($pcfg->param("MAIN.MINISERVER"));
+my $msno = $pcfg->param("MAIN.MINISERVER");
 
-my $ms = $pcfg->param("MAIN.MINISERVER");
 
 LOGDEB "Congigured prefix: $prefix";
-LOGDEB "Configured miniserver: $ms";
 LOGDEB "Configured no. of miniserver: $msno";
 LOGDEB "Congigured sampling rate: $samplingRate";
 
