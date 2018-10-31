@@ -87,8 +87,6 @@ if ( param('saveIoConfig') ) {
   	$pcfg->param("INPUTS.INPUTSAMPLINGRATERATE", param('input_samplingrate'));
   	$pcfg->param("MAIN.MINISERVER", param('selMiniServer'));
   
-  
-	
 	if($messagetype ne("error")){
 		$pcfg->save();
   		system($^X, "$lbpbindir/inoutpinconfig.pl");

@@ -22,7 +22,7 @@
 }
 
 .separatingline{
-	border-bottom: 2px ridge #cdcdcd;
+	border-bottom: 2px solid #cdcdcd;
 }
 
 .tableheadline {
@@ -33,5 +33,22 @@
 	font-size: 0.75em;
     margin-top: 5px;
 }
+.wiring{
+	text-align: center;
+}
+.wiring .ui-radio{
+	float: left;
+	margin-left: auto
+}
+.wiring legend{
+	margin: auto
+}
+.radiocontainer{
+	display: flex;
+  align-items: center;
+  justify-content: center;	
+}
+   
+
 
     
