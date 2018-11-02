@@ -78,17 +78,10 @@
 				                 						<input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
 				                 						<p><TMPL_VAR NAME=errormessage></p>
 				                 						<div class="wiring">
-															<fieldset>
-																
-																<div class="radiocontainer">
-																	<legend>Beschaltung:</legend>
-																	<input type="radio" id="pullup<TMPL_VAR NAME=current>" name="wiring<TMPL_VAR NAME=current>" value="u" checked="checked">
-															   		<label for="pullup<TMPL_VAR NAME=current>">Pull Up</label> 
-															   		<input type="radio" id="pulldown<TMPL_VAR NAME=current>" name="wiring<TMPL_VAR NAME=current>" value="d">
-															   		<label for="pulldown<TMPL_VAR NAME=current>">Pull Down</label>
-																</div>
-															    
-															</fieldset>
+				                 						<fieldset>
+				                 							<legend>Beschaltung:</legend>
+														  	<TMPL_VAR SELECTLIST>
+														</fieldset>
 				                 						</div>
 				                 					</td>
 				                 				</tr>
@@ -168,6 +161,5 @@
                 </div>
         </div>
 </div>
-
 
 

@@ -33,16 +33,17 @@
 	font-size: 0.75em;
     margin-top: 5px;
 }
-.wiring{
-	text-align: center;
-}
-.wiring .ui-radio{
-	float: left;
-	margin-left: auto
-}
+
+
 .wiring legend{
-	margin: auto
+	float: left;
+    line-height: 60px;
+    vertical-align: middle;
 }
+.wiring.ui-select{
+	float: right;
+    width: 60%;
+} 
 .radiocontainer{
 	display: flex;
   align-items: center;
