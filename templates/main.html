@@ -72,11 +72,17 @@
 				                 				<td>GPIO Nummer</td>
 				                 			</tr>
 				                 			<TMPL_LOOP NAME=number_of_inputs>
-				                 				<tr>
+				                 				<tr >
 				                 					<td width="50%" class= "<TMPL_VAR NAME=class> inputlabel">Eingänge <TMPL_VAR NAME=current>:</td>
-				                 					<td width="50%" class= "<TMPL_VAR NAME=class>">
+				                 					<td width="50%" class= "<TMPL_VAR NAME=class> separatingline">
 				                 						<input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
 				                 						<p><TMPL_VAR NAME=errormessage></p>
+				                 						<div class="wiring">
+				                 						<fieldset>
+				                 							<legend>Beschaltung:</legend>
+														  	<TMPL_VAR SELECTLIST>
+														</fieldset>
+				                 						</div>
 				                 					</td>
 				                 				</tr>
 				                 			</TMPL_LOOP>
@@ -155,6 +161,5 @@
                 </div>
         </div>
 </div>
-
 
 

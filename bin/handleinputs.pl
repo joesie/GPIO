@@ -13,8 +13,6 @@ use Time::HiRes qw ( sleep );
 
 my $log = LoxBerry::Log->new(name => 'Input_handler',);
 
-
-
 LOGSTART("Handle input daemon");
 
 my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");

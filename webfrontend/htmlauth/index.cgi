@@ -3,6 +3,7 @@
 use LoxBerry::System;
 use LoxBerry::Web;
 use File::HomeDir;
+use LoxBerry::Log;
 
 use CGI qw/:standard/;
 use Config::Simple qw/-strict/;
@@ -17,6 +18,9 @@ my $messagetype;
 my %errormessages;
 my $inputPrefixErrorMessage;
 my $inputPrefixErrorClass;
+
+my $log = LoxBerry::Log->new(name => 'CGI',);
+LOGSTART("CGI daemon");
 
 my $cgi = CGI->new;
 $cgi->import_names('R');
@@ -68,6 +72,11 @@ if ( param('saveIoConfig') ) {
 			$errormessages{"inputs.input$currentInputCount"} = $result;
 		}
 	}
+	for($currentInputCount=0; $currentInputCount< $pcfg->param("gpios.inputCount"); $currentInputCount++){
+		my $wiringValue = param("INPUTS.INPUTWIRING$currentInputCount");
+		$pcfg->param("INPUTS.INPUTWIRING$currentInputCount", "$wiringValue");
+	}
+	
 	for( $currentOutputCount=0; $currentOutputCount< $pcfg->param("gpios.outputCount"); $currentOutputCount++){
 		my $outputValue = param("output$currentOutputCount");
 		$pcfg->param("outputs.output$currentOutputCount", "$outputValue");
@@ -77,6 +86,7 @@ if ( param('saveIoConfig') ) {
 			$errormessages{"outputs.output$currentOutputCount"} = $result;
 		}
 	}
+	
 	my $input_prefixLength=length(param('input_prefix'));
 	if($input_prefixLength <=0){
 		$messagetype = "error";
@@ -87,8 +97,6 @@ if ( param('saveIoConfig') ) {
   	$pcfg->param("INPUTS.INPUTSAMPLINGRATERATE", param('input_samplingrate'));
   	$pcfg->param("MAIN.MINISERVER", param('selMiniServer'));
   
-  
-	
 	if($messagetype ne("error")){
 		$pcfg->save();
   		system($^X, "$lbpbindir/inoutpinconfig.pl");
@@ -162,10 +170,37 @@ sub createInputOutputConfig{
   	if($error ne ""){
   		$class = "error";
   	}
-    push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class};
+  	
+  	my $wiring= $pcfg->param("$_[1]WIRING$i");
+  	my $confwiring= $pcfg->param("$_[1]WIRING$i");
+  	my @wiring = ('d', 'u' );
+  	my %wiringlabels = (
+	      'd' => 'Pulldown',
+	      'u' => 'Pullup',
+	  );
+	my $wiringselectlist = $cgi->popup_menu(
+	      -id	=> 'INPUTS.INPUTWIRING' . $i,
+	      -name    => 'INPUTS.INPUTWIRING' . $i,
+	      -values  => \@wiring,
+	      -labels  => \%wiringlabels,
+	      -default => $confwiring,
+	  );
+    
+ 
+    
+    if($_[1] eq "outputs.output"){
+  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class};
+  	} else {
+  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class, SELECTLIST =>$wiringselectlist};
+  	}
+    
+    
   }
   return @result;
 }
+
+
+
 
 # ---------------------------------------------------
 # Control for "selMiniServer" Dropdown
@@ -233,3 +268,9 @@ print LoxBerry::Web::logfile_button_html( NAME => 'Input_handler' );
 LoxBerry::Web::lbfooter();
 
 exit;
+END
+{
+    if ($log) {
+        $log->LOGEND;
+    }
+}
