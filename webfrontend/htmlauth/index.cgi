@@ -172,9 +172,9 @@ sub createInputOutputConfig{
   	}
   	
   	my $wiring= $pcfg->param("$_[1]WIRING$i");
-  my $confwiring= $pcfg->param("$_[1]WIRING$i");
-  my @wiring = ('d', 'u' );
-  my %wiringlabels = (
+  	my $confwiring= $pcfg->param("$_[1]WIRING$i");
+  	my @wiring = ('d', 'u' );
+  	my %wiringlabels = (
 	      'd' => 'Pulldown',
 	      'u' => 'Pullup',
 	  );
@@ -199,18 +199,7 @@ sub createInputOutputConfig{
   return @result;
 }
 
-##
-# Control for Wiring Radios
-##
-sub createWiringRadio{
-	my @result;
-  	my $i;
-  	
-  	for($i=0;$i<$pcfg->param("gpios.inputCount");$i++){
-  		
-  	}
-  	
-}
+
 
 
 # ---------------------------------------------------
