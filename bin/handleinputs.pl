@@ -19,6 +19,7 @@ my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $prefix = $pcfg->param("INPUTS.PREFIX");
 my $samplingRate = $pcfg->param("INPUTS.INPUTSAMPLINGRATERATE");
 my $msno = $pcfg->param("MAIN.MINISERVER");
+my $cfg_timestamp = 0;
 
 
 LOGDEB "Congigured prefix: $prefix";
@@ -52,15 +53,42 @@ while(1){
 		    LOGDEB "Send ok $prefix$i: $value";
 		}
 	}
+	# alle 5s Config prüfen und lesen
+	if ((time%5) == 0 ) {
+		read_config();
+	}
+	
 	#wenn der Loglevel mehr als Fehler ist (z.b. Debug) wird die Pollzeit aus
 	#Sicherheitsgruenden fest auf 1s fest gesetzt 
 	if($log->loglevel() >3){
 		sleep(1);
 	} else {
 		sleep ($samplingRate);
+	}	
+}
+
+
+
+
+
+#####################################
+# read_config
+# Reads and re-reads the config
+sub read_config
+{	
+	# Check if config has changed
+	my $mtime = (stat($cfgfilename))[9];
+	if($cfg_timestamp == $mtime and $pcfg) {
+		LOGDEB "Config doesn't changed";
+		return;
 	}
+	LOGINF "Reading Plugin config";
+	$cfg_timestamp = $mtime;
+	
+	$pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 	
 }
+
 
 exit;
 END
