@@ -55,10 +55,9 @@ while(1){
 		}
 	}
 	# alle 5s Config prüfen und lesen
-#	if ((time%5) == 0 ) {
-#		read_config();
-#		LOGINF "New config loaded";
-#	}
+	if ((time%5) == 0 ) {
+		read_config();
+	}
 	
 	#wenn der Loglevel mehr als Fehler ist (z.b. Debug) wird die Pollzeit aus
 	#Sicherheitsgruenden fest auf 1s fest gesetzt 
@@ -89,6 +88,11 @@ sub read_config
 	
 	$pcfg = new Config::Simple($cfgfilename);
 	
+	$prefix = $pcfg->param("INPUTS.PREFIX");
+	$samplingRate = $pcfg->param("INPUTS.INPUTSAMPLINGRATERATE");
+	$msno = $pcfg->param("MAIN.MINISERVER");
+	
+	LOGINF "New config loaded";
 }
 
 
