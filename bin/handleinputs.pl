@@ -12,10 +12,11 @@ use LoxBerry::Log;
 use Time::HiRes qw ( sleep );
 
 my $log = LoxBerry::Log->new(name => 'Input_handler',);
+my $cfgfilename = "$lbpconfigdir/pluginconfig.cfg";
 
 LOGSTART("Handle input daemon");
 
-my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
+my $pcfg = new Config::Simple($cfgfilename);
 my $prefix = $pcfg->param("INPUTS.PREFIX");
 my $samplingRate = $pcfg->param("INPUTS.INPUTSAMPLINGRATERATE");
 my $msno = $pcfg->param("MAIN.MINISERVER");
@@ -54,9 +55,10 @@ while(1){
 		}
 	}
 	# alle 5s Config prüfen und lesen
-	if ((time%5) == 0 ) {
-		read_config();
-	}
+#	if ((time%5) == 0 ) {
+#		read_config();
+#		LOGINF "New config loaded";
+#	}
 	
 	#wenn der Loglevel mehr als Fehler ist (z.b. Debug) wird die Pollzeit aus
 	#Sicherheitsgruenden fest auf 1s fest gesetzt 
@@ -85,7 +87,7 @@ sub read_config
 	LOGINF "Reading Plugin config";
 	$cfg_timestamp = $mtime;
 	
-	$pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
+	$pcfg = new Config::Simple($cfgfilename);
 	
 }
 
