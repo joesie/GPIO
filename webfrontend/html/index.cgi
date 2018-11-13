@@ -45,12 +45,21 @@ sub swichChannel{
 	}
 	
 	my $channel = substr($name, 1, 3);
-	my $gpio= $pcfg->param("outputs.output$channel");
+	my $gpio= $pcfg->param("OUTPUTS.OUTPUT$channel");
+	my $invert = $pcfg->param("OUTPUTS.OUTPUT$channel".".INVERT");
 	
 	if($value eq("on")){
-		system("pigs w $gpio 1");
+		if($invert eq("true")){
+			system("pigs w $gpio 0");
+		} else {
+			system("pigs w $gpio 1");	
+		}
 	}else{
-		system("pigs w $gpio 0");
+		if($invert eq("true")){
+			system("pigs w $gpio 1");
+		} else {
+			system("pigs w $gpio 0");	
+		}
 	}
 	return 0;
 }

@@ -18,7 +18,7 @@ my $i;
 
 # set up GPIOs as outputs
 for($i=0;$i<$pcfg->param("gpios.outputCount");$i++){
-  	my $value= $pcfg->param("outputs.output$i");
+  	my $value= $pcfg->param("OUTPUTS.OUTPUT$i");
     system("pigs modes $value w");
 }
 

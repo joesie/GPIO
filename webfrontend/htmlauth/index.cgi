@@ -79,13 +79,20 @@ if ( param('saveIoConfig') ) {
 	
 	for( $currentOutputCount=0; $currentOutputCount< $pcfg->param("gpios.outputCount"); $currentOutputCount++){
 		my $outputValue = param("output$currentOutputCount");
-		$pcfg->param("outputs.output$currentOutputCount", "$outputValue");
+		$pcfg->param("OUTPUTS.OUTPUT$currentOutputCount", "$outputValue");
 		my $result = &validateGpioUserData($outputValue);
 		if($result ne("ok")){
 			$messagetype = "error";
-			$errormessages{"outputs.output$currentOutputCount"} = $result;
+			$errormessages{"OUTPUTS.OUTPUT$currentOutputCount"} = $result;
 		}
 	}
+	
+	for( $currentOutputCount=0; $currentOutputCount< $pcfg->param("gpios.outputCount"); $currentOutputCount++){
+		my $invertValue = param("OUTPUTS.OUTPUT$currentOutputCount".".INVERT");
+		$pcfg->param("OUTPUTS.OUTPUT$currentOutputCount".".INVERT", "$invertValue");
+	}
+	
+
 	
 	my $input_prefixLength=length(param('input_prefix'));
 	if($input_prefixLength <=0){
@@ -173,6 +180,7 @@ sub createInputOutputConfig{
   	
   	my $wiring= $pcfg->param("$_[1]WIRING$i");
   	my $confwiring= $pcfg->param("$_[1]WIRING$i");
+  	my $configInvert = $pcfg->param("$_[1]$i".".INVERT");
   	my @wiring = ('d', 'u' );
   	my %wiringlabels = (
 	      'd' => 'Pulldown',
@@ -185,11 +193,19 @@ sub createInputOutputConfig{
 	      -labels  => \%wiringlabels,
 	      -default => $confwiring,
 	  );
+	  
+	my $invertcheck = $cgi->checkbox(
+		-id	=> "OUTPUTS.OUTPUT$i".".INVERT",
+		-name=>"OUTPUTS.OUTPUT$i".".INVERT", 
+		-label=>'Invertieren',
+		-value=>'true', 
+		-checked=>$configInvert 
+	);
     
  
     
-    if($_[1] eq "outputs.output"){
-  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class};
+    if($_[1] eq "OUTPUTS.OUTPUT"){
+  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class, INVERTCHECK =>$invertcheck};
   	} else {
   		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class, SELECTLIST =>$wiringselectlist};
   	}
@@ -244,7 +260,7 @@ $template->param("SELECT_OUTPUT_COUNT" => \@outputSelectArray);
 my @inputSelectArray = &createSelectArray($pcfg->param("gpios.inputCount"));
 $template->param("select_input_count" => \@inputSelectArray);
 
-my @outputConfigArray = &createInputOutputConfig($pcfg->param("gpios.outputCount"), "outputs.output");
+my @outputConfigArray = &createInputOutputConfig($pcfg->param("gpios.outputCount"), "OUTPUTS.OUTPUT");
 $template->param("number_of_outputs" => \@outputConfigArray);
 my @inputConfigArray = &createInputOutputConfig($pcfg->param("gpios.inputCount"), "INPUTS.INPUT");
 $template->param("number_of_inputs" => \@inputConfigArray);
