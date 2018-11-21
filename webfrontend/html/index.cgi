@@ -23,14 +23,14 @@ foreach $name ( @names ) {
 	if (  $name =~ /\_/ ) { 
         next;
     } else {
-        my $currentResult = &swichChannel($name, $query->param($name));
+        my $currentResult = &switchChannel($name, $query->param($name));
         if($currentResult < 0){
         		$result = $currentResult;
         }
     }
 }
   
-sub swichChannel{
+sub switchChannel{
 	my $name = $_[0];
 	my $value = $_[1];
 	
