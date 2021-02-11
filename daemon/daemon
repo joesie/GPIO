@@ -17,7 +17,7 @@ fi
 
 
 $LBHOMEDIR/bin/plugins/gpio/inoutpinconfig.pl
-$LBHOMEDIR/bin/plugins/gpio/handleinputs.pl 
+$LBHOMEDIR/bin/plugins/gpio/handleinputs.pl &
 
 
 exit 0
