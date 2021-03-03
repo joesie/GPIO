@@ -4,7 +4,7 @@
 # (*BEFORE* preinstall but *AFTER* preupdate). Use with caution and remember,
 # that all systems may be different!
 #
-# Exit code must be 0 if executed successfull. 
+# Exit code must be 0 if executed successfull.
 # Exit code 1 gives a warning but continues installation.
 # Exit code 2 cancels installation.
 #
@@ -56,3 +56,7 @@ echo "<INFO> Plugin Template folder is: $PTEMPL"
 echo "<INFO> Plugin Data folder is: $PDATA"
 echo "<INFO> Plugin Log folder (on RAMDISK!) is: $PLOG"
 echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
+
+git clone https://github.com/eclipse/paho.mqtt.python.git
+cd paho.mqtt.python
+python3 setup.py install

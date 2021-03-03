@@ -20,7 +20,7 @@
                                                                                 <option value='<TMPL_VAR NAME=COUNT>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT></option>
                                                                         </TMPL_LOOP>
                                                                 </select>
-                                                                
+
                                                         </td>
                                                         <td width="20%">
                                                                 &nbsp;
@@ -33,13 +33,13 @@
                                                                         <TMPL_LOOP NAME=SELECT_OUTPUT_COUNT>
                                                                                 <option value='<TMPL_VAR NAME=COUNT>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT></option>
                                                                         </TMPL_LOOP>
-                                                                </select>                                                
-                                                        </td>  
+                                                                </select>
+                                                        </td>
                                                 </tr>
-                                            
+
                                         </table>
-                                        
-                                        
+
+
                                         <table class="formtable" border="0" width="100%">
                                                 <tr>
                                                         <td width="40%">&nbsp</td>
@@ -50,13 +50,13 @@
                                                                 <input id="submit" name="submit" type="submit" value="Speichern">
                                                         </td>
                                                         <td width="40%">&nbsp</td>
-                                                </tr> 
-                                        </table>  
+                                                </tr>
+                                        </table>
                                 </div>
                         </form>
                         <h2>Kanalkonfiguration</h2>
                         <div>
-                        		<p>Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen. 
+                        		<p>Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen.
                         		In das Eingabefeld wird hierfür für jeden Kanal des verwendete GPIO Anschluss eingetragen. Die GPIO Pin Belegung kann <a href="https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm">hier</a> nachgelesen werden.</p>
                         </div>
                         <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
@@ -78,10 +78,10 @@
 				                 						<input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
 				                 						<p><TMPL_VAR NAME=errormessage></p>
 				                 						<div class="wiring">
-				                 						<fieldset>
-				                 							<legend>Beschaltung:</legend>
-														  	<TMPL_VAR SELECTLIST>
-														</fieldset>
+  				                 						<fieldset>
+  				                 							<legend>Beschaltung:</legend>
+  													 	          <TMPL_VAR SELECTLIST>
+  														        </fieldset>
 				                 						</div>
 				                 					</td>
 				                 				</tr>
@@ -103,7 +103,7 @@
                                                                   <option value='<TMPL_VAR NAME=VALUE>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=LABEL></option>
                                                           </TMPL_LOOP>
                                                      </select>
-				                 					
+
 				                 				</td>
 				                 			</tr>
 				                 			<tr><td colspan=2> <p class="help">Das Abtastintervall sollte immer halb so lang sein, wie die Signallänge, die am Eingang minimal anliegt. Nur so ist gewährleistet, dass der Wert zuverlässig gelesen werden kann. Doch Achtung: ein kurzes Intervall führt zu einer strken
@@ -112,13 +112,13 @@
 				                 				<td class= "<TMPL_VAR NAME=class> inputlabel">Miniserver:</td>
 				                 				<td>
 				                 					<TMPL_VAR selMiniServer>
-				                 				
+
 				                 				</td>
 				                 			</tr>
-				                 			
+
 			                 			</table>
-				                
-				                 		
+
+
 				                 	</td>
 				                 	<td width="50%" style="vertical-align: top;">
 				                 		<h2 class="tableheadline">Ausgänge</h2>
@@ -138,7 +138,7 @@
 				                 			</TMPL_LOOP>
 				                 		</table>
 				                 	</td>
-				 
+
 				                 </tr>
 				           	</table>
 				           	<table class="formtable" border="0" width="100%">
@@ -151,15 +151,13 @@
                                                  <input id="submit2" name="submit2" type="submit" value="Speichern">
                                          </td>
                                          <td width="40%">&nbsp</td>
-                                 </tr> 
-                         	</table>  
+                                 </tr>
+                         	</table>
                         </div>
                         </form>
-                 
-                 
-                     
+
+
+
                 </div>
         </div>
 </div>
-
-

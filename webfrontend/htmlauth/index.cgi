@@ -6,13 +6,12 @@ use File::HomeDir;
 use LoxBerry::Log;
 
 use CGI qw/:standard/;
-use Config::Simple qw/-strict/;
 use warnings;
 use strict;
 
 use IPC::System::Simple qw(system capture);
+use LoxBerry::JSON;
 
-my $pcfg = new Config::Simple("$lbpconfigdir/pluginconfig.cfg");
 my $message;
 my $messagetype;
 my %errormessages;
@@ -20,25 +19,36 @@ my $inputPrefixErrorMessage;
 my $inputPrefixErrorClass;
 
 my $log = LoxBerry::Log->new(name => 'CGI',);
-LOGSTART("CGI daemon");
+LOGSTART("GPIO CGI Log");
+
+my $cfgfile = "$lbpconfigdir/pluginconfig.json";
+LOGINF $cfgfile;
+
+my $jsonobj = LoxBerry::JSON->new();
+my $pcfg = $jsonobj->open(filename => $cfgfile);
+if (!$pcfg) {
+	LOGERR "No configfile found";
+	exit;
+}
+
 
 my $cgi = CGI->new;
 $cgi->import_names('R');
 
 ##
-# validate Userdata 
+# validate Userdata
 ##
 sub validateGpioUserData{
 	my $value= $_[0];
-	
+
 	if($value eq("")){
 		return "Feld darf nicht leer sein!";
 	}
-	
+
 	if ($value !~ /^\d+?$/) {
 		return "Nur Zahlen sind erlaubt";
 	}
-	
+
 	if($value > 27 || $value < 2){
 		return "Nur Werte zwischen 2 und 27 sind erlaubt!";
 	}
@@ -51,64 +61,70 @@ if ( param('saveCount') ) {
   my $outputCount = param('output_count');
   my $inputCount = param('input_count');
 
-  $pcfg->param("gpios.inputCount", "$inputCount");
-  $pcfg->param("gpios.outputCount", "$outputCount");
-  
-  $pcfg->save();
+  $pcfg->{gpio}->{inputs}->{count} = "$inputCount";
+  $pcfg->{gpio}->{outputs}->{count}= "$outputCount";
+	my $saved = $jsonobj->write();
+  LOGINF "Configuration saved $saved";
 }
 
-
+#==============
 # Save settings
+#==============
 if ( param('saveIoConfig') ) {
 	my $currentInputCount;
 	my $currentOutputCount;
-	
-	for($currentInputCount=0; $currentInputCount< $pcfg->param("gpios.inputCount"); $currentInputCount++){
+
+# Handle input settings
+	for($currentInputCount=0; $currentInputCount< $pcfg->{gpio}->{inputs}->{count}; $currentInputCount++){
 		my $inputValue = param("input$currentInputCount");
-		$pcfg->param("INPUTS.INPUT$currentInputCount", "$inputValue");
+		my $wiringValue = param("INPUTS.INPUTWIRING$currentInputCount");
+
+		$pcfg->{gpio}->{inputs}->{"channel_$currentInputCount"}->{pin} = "$inputValue";
+		$pcfg->{gpio}->{inputs}->{"channel_$currentInputCount"}->{wiring} = "$wiringValue";
+
 		my $result = &validateGpioUserData($inputValue);
 		if($result ne("ok")){
 			$messagetype = "error";
-			$errormessages{"inputs.input$currentInputCount"} = $result;
+			$errormessages{"inputs.pin$currentInputCount"} = $result;
 		}
 	}
-	for($currentInputCount=0; $currentInputCount< $pcfg->param("gpios.inputCount"); $currentInputCount++){
-		my $wiringValue = param("INPUTS.INPUTWIRING$currentInputCount");
-		$pcfg->param("INPUTS.INPUTWIRING$currentInputCount", "$wiringValue");
-	}
-	
-	for( $currentOutputCount=0; $currentOutputCount< $pcfg->param("gpios.outputCount"); $currentOutputCount++){
+
+# handle output settings
+	for( $currentOutputCount=0; $currentOutputCount< $pcfg->{gpio}->{outputs}->{count}; $currentOutputCount++){
 		my $outputValue = param("output$currentOutputCount");
-		$pcfg->param("outputs.output$currentOutputCount", "$outputValue");
+
+		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{pin} = "$outputValue";
 		my $result = &validateGpioUserData($outputValue);
 		if($result ne("ok")){
 			$messagetype = "error";
-			$errormessages{"outputs.output$currentOutputCount"} = $result;
+			$errormessages{"outputs.pin$currentOutputCount"} = $result;
 		}
 	}
-	
+
+	# main settings
 	my $input_prefixLength=length(param('input_prefix'));
 	if($input_prefixLength <=0){
 		$messagetype = "error";
 		$inputPrefixErrorMessage = "Das Feld darf nicht leer sein!";
 		$inputPrefixErrorClass = "error";
 	}
-	$pcfg->param("INPUTS.PREFIX", param('input_prefix'));
-  	$pcfg->param("INPUTS.INPUTSAMPLINGRATERATE", param('input_samplingrate'));
-  	$pcfg->param("MAIN.MINISERVER", param('selMiniServer'));
-  
+	$pcfg->{main}->{prefix} = param('input_prefix');
+  $pcfg->{main}->{samplingrate} = param('input_samplingrate');
+  $pcfg->{main}->{miniserver} = param('selMiniServer');
+
 	if($messagetype ne("error")){
-		$pcfg->save();
-  		system($^X, "$lbpbindir/inoutpinconfig.pl");
-  		$message = "Eingaben wurden erfolgreich gespeichert";
-  		$messagetype = "info";
+
+		my $saved = $jsonobj->write();
+		LOGINF "Configuration saved $saved";
+
+  	system($^X, "$lbpbindir/inoutpinconfig.pl"); #FIXME This file is deprecated
+  	$message = "Eingaben wurden erfolgreich gespeichert";
+  	$messagetype = "info";
 	} else{
 		$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
 	}
-	
+
 }
-
-
 
 ##
 #Parameter the selected option
@@ -122,7 +138,7 @@ sub createSelectArray{
       $selected = "";
       if($i == $_[0]){
         $selected = 'selected';
-      } 
+      }
       push @result, {COUNT=>$i, CHOOSED=>$selected};
   }
   return @result;
@@ -132,26 +148,24 @@ sub createSelectArray{
 # Control for "samplingrate" Dropdown
 # ---------------------------------------------------
 sub samplingRates{
-  	my @result;
-  	my @values  = (0.05,0.1,0.25,0.5);
-
-
-	my $default = $pcfg->param("INPUTS.INPUTSAMPLINGRATERATE");
+  my @result;
+  my @values  = (0.05,0.1,0.25,0.5);
+	my $default = $pcfg->{main}->{samplingrate};
 	my $selected = "";
-	
+
 	foreach my $value (@values) {
    		$selected = "";
    		if($value == $default){
    			$selected = 'selected';
    		}
-   		my $label = $value * 1000; 
+   		my $label = $value * 1000;
    		push @result, {VALUE=>$value, LABEL=>"$label ms" ,CHOOSED=>$selected};
 	}
 	if(1 == $default){
    		$selected = 'selected';
     }
   	push @result, {VALUE=>1, LABEL=>"1s" ,CHOOSED=>$selected};
-  	
+
   	return @result;
 }
 
@@ -164,48 +178,42 @@ sub createInputOutputConfig{
   my $i;
 
   for($i=0;$i<$_[0];$i++){
-  	my $value= $pcfg->param("$_[1]$i");
-  	my $error = $errormessages{"$_[1]$i"};
+
+		my $value = $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{pin};
+  	my $error = $errormessages{"$_[1].pin$i"};
   	my $class = "info";;
   	if($error ne ""){
   		$class = "error";
   	}
-  	
-  	my $wiring= $pcfg->param("$_[1]WIRING$i");
-  	my $confwiring= $pcfg->param("$_[1]WIRING$i");
-  	my @wiring = ('d', 'u' );
-  	my %wiringlabels = (
-	      'd' => 'Pulldown',
-	      'u' => 'Pullup',
-	  );
-	my $wiringselectlist = $cgi->popup_menu(
-	      -id	=> 'INPUTS.INPUTWIRING' . $i,
-	      -name    => 'INPUTS.INPUTWIRING' . $i,
-	      -values  => \@wiring,
-	      -labels  => \%wiringlabels,
-	      -default => $confwiring,
-	  );
-    
- 
-    
-    if($_[1] eq "outputs.output"){
+
+    if($_[1] eq "outputs"){
   		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class};
   	} else {
+			# for inputs need to configure the wiring Dropdown
+			my $wiring=     $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
+			my $confwiring= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
+			my @wiring = ('d', 'u' );
+			my %wiringlabels = (
+					'd' => 'Pulldown',
+					'u' => 'Pullup',
+			);
+			my $wiringselectlist = $cgi->popup_menu(
+					-id	=> 'INPUTS.INPUTWIRING' . $i,
+					-name    => 'INPUTS.INPUTWIRING' . $i,
+					-values  => \@wiring,
+					-labels  => \%wiringlabels,
+					-default => $confwiring,
+			);
   		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class, SELECTLIST =>$wiringselectlist};
   	}
-    
-    
   }
   return @result;
 }
 
-
-
-
 # ---------------------------------------------------
 # Control for "selMiniServer" Dropdown
 # ---------------------------------------------------
- 
+
 my %miniservers = LoxBerry::System::get_miniservers();
 my @miniserverarray;
 my %miniserverhash;
@@ -214,16 +222,15 @@ foreach my $ms (sort keys %miniservers)
 {
     push @miniserverarray, "$ms";
     $miniserverhash{"$ms"} = $miniservers{$ms}{Name};
-
 }
- 
+
 my $selMiniServer = $cgi->popup_menu(
       -name    => 'selMiniServer',
       -values  => \@miniserverarray,
       -labels  => \%miniserverhash,
-      -default => $pcfg->param('MAIN.DEFAULT.MINISERVER'),
+      -default => $pcfg->{main}->{miniserver},
   );
- 
+
 
 ##
 #handle Template and render index page
@@ -239,18 +246,18 @@ LoxBerry::Web::lbheader("$plugintitle $version", "https://www.loxwiki.eu/pages/v
 #Load Template and fill with given parameters
 my $template = HTML::Template->new(filename => "$lbptemplatedir/main.html");
 
-my @outputSelectArray = &createSelectArray($pcfg->param("gpios.outputCount"));
+my @outputSelectArray = &createSelectArray($pcfg->{gpio}->{outputs}->{count});
 $template->param("SELECT_OUTPUT_COUNT" => \@outputSelectArray);
-my @inputSelectArray = &createSelectArray($pcfg->param("gpios.inputCount"));
+my @inputSelectArray = &createSelectArray($pcfg->{gpio}->{inputs}->{count});
 $template->param("select_input_count" => \@inputSelectArray);
 
-my @outputConfigArray = &createInputOutputConfig($pcfg->param("gpios.outputCount"), "outputs.output");
+my @outputConfigArray = &createInputOutputConfig($pcfg->{gpio}->{outputs}->{count}, "outputs");
 $template->param("number_of_outputs" => \@outputConfigArray);
-my @inputConfigArray = &createInputOutputConfig($pcfg->param("gpios.inputCount"), "INPUTS.INPUT");
+my @inputConfigArray = &createInputOutputConfig($pcfg->{gpio}->{inputs}->{count}, "inputs");
 $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
-$template->param("input_prefix" => $pcfg->param("INPUTS.PREFIX"));
+$template->param("input_prefix" => $pcfg->{main}->{prefix});
 $template->param("input_prefix_error_message" => $inputPrefixErrorMessage);
 $template->param("input_prefix_error_class" => $inputPrefixErrorClass);
 

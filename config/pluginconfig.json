@@ -1,0 +1,15 @@
+{
+   "gpio" : {
+      "inputs" : {
+         "count" : "0"
+      },
+      "outputs" : {
+         "count" : "0"
+      }
+   },
+   "main" : {
+      "miniserver" : "1",
+      "prefix" : "GPIO",
+      "samplingrate" : "0.1"
+   }
+}
