@@ -56,14 +56,14 @@ def callback_input(channel):
 ##
 # setup GPIOS
 ##
-GPIO.setmode(GPIO.BOARD)
+GPIO.setmode(GPIO.BCM)
 with open('/opt/loxberry/config/plugins/gpio/pluginconfig.json') as json_pcfg_file:
     pcfg = json.load(json_pcfg_file)
     gpio = pcfg['gpio']
 
     # configure inputs
     inputs = gpio['inputs']
-    for i in range(1, int(inputs['count'])):
+    for i in range(0, int(inputs['count'])):
         key = "channel_{}".format(i)
         channel = inputs[key]
 
@@ -84,21 +84,73 @@ with open('/opt/loxberry/config/plugins/gpio/pluginconfig.json') as json_pcfg_fi
 
 # ============================
 
+def main():
+    def on_connect(client, userdata, flags, rc):
+        client.subscribe("gpio/Output/#")
+
+# ============================
+	# def on_message(client, userdata, msg):
+    # 	print("Topic: " + msg.topic + " with Payload: " + str(msg.payload.decode("utf-8"))) + "!"
+    #
+    #     mymsg = str(msg.payload.decode("utf-8"))
+    #  	mytopic = str(msg.topic)
+    # 	print "Topic: " + mytopic + " with Payload: " + mymsg + "!"
+    # 	now = datetime.datetime.now()
+    #
+    # 	# Search for topic in List of available output pins (BCM names) and set gpio to state LOW or HIGH
+    #     for i in range(2, 27):
+    #       print ("Output/Pin_" + str(i))
+    #       if mytopic == "gpio/Output/Pin_" + str(i) :
+    #         if mymsg == "ON" or mymsg == "1" or mymsg == "on" :
+    #             GPIO.output(i, GPIO.LOW)
+    #             time.sleep(SleepTimeL);
+    #             print "Pin_" + str(i) + " on"
+    #             publish.single(MQTT_PATH_STATE + str(i) + "/stateText", "on", hostname=MQTT_SERVER)
+    #             publish.single(MQTT_PATH_STATE + str(i) + "/state", "1"     , hostname=MQTT_SERVER)
+    #             publish.single(MQTT_PATH_STATE + str(i) + "/timestamp_ON" , now.strftime('%Y-%m-%d %H:%M:%S'), hostname=MQTT_SERVER)
+    #     	    print (MQTT_PATH_STATE + str(i) + "/|-- Timestamp ON:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+    #
+    #         if mymsg == "OFF" or mymsg == "0" or mymsg == "off":
+    #             GPIO.output(i, GPIO.HIGH)
+    #             time.sleep(SleepTimeL);
+    #             print "Pin_" + str(i) + " off"
+    # 		    publish.single(MQTT_PATH_STATE + str(i) + "/stateText", "off", hostname=MQTT_SERVER)
+    #             publish.single(MQTT_PATH_STATE + str(i) + "/state", "0"      , hostname=MQTT_SERVER)
+    #             publish.single(MQTT_PATH_STATE + str(i) + "/timestamp_OFF"  , now.strftime('%Y-%m-%d %H:%M:%S'), hostname=MQTT_SERVER)
+    # 	        print (MQTT_PATH_STATE + str(i) + "/|-- Timestamp OFF:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
 
 
 
+# ============================
+with open('/opt/loxberry/data/system/plugindatabase.json') as json_plugindatabase_file:
+    plugindatabase = json.load(json_plugindatabase_file)
+    mqttconfigdir = plugindatabase['plugins']['07a6053111afa90479675dbcd29d54b5']['directories']['lbpconfigdir']
+#TODO if no mqttconfig found, leave the script with an error
+    mqttconfig = None
+    with open(mqttconfigdir + '/mqtt.json') as json_mqttconfig_file:
+        mqttconfig = json.load(json_mqttconfig_file)
+    print(json.dumps(mqttconfig, indent=4, sort_keys=True))
 
+    mqttcred = None
+    with open(mqttconfigdir + '/cred.json') as json_mqttcred_file:
+        mqttcred = json.load(json_mqttcred_file)
+    print(json.dumps(mqttcred, indent=4, sort_keys=True))
+    mqttuser = mqttcred['Credentials']['brokeruser']
+    mqttpass = mqttcred['Credentials']['brokerpass']
 
-#def main():
-    # while 1:
-    #     print ("while loop active")
-    #     time.sleep(10);
+    print("User " + str(mqttuser))
+    print("Userpass " + str(mqttpass))
 
-client = mqtt.Client()
-# client.on_connect = on_connect
- # client.on_message = on_message
-client.connect("localhost", 1883, 60)
-client.loop_forever()
+# ============================
+
+    client = mqtt.Client()
+#client.on_connect = on_connect
+#client.on_message = on_message
+    client.username_pw_set(mqttuser, mqttpass)
+    client.connect("localhost", 1883, 60)
+    client.loop_forever()
+
+# ============================
 
 
 if __name__ == '__main__':
