@@ -25,7 +25,7 @@ SleepTimeL = 0.2
 MQTT_TOPIC_OUTPUT  = "gpio/set/"
 MQTT_TOPIC_OUTPUT_RESPONSE  = "gpio/"
 MQTT_PATH_STATE_INPUT   = "gpio/"
-client = None
+client = mqtt.Client()
 
 # Standards and Command line
 loglevel="ERROR"
@@ -162,7 +162,11 @@ with open('/opt/loxberry/config/plugins/gpio/pluginconfig.json') as json_pcfg_fi
 def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC_OUTPUT + "#")
     client.publish(MQTT_TOPIC_OUTPUT_RESPONSE+'status', "Online")
+# ============================
 
+def on_disconnect(client, userdata, flags, rc):
+    client.publish(MQTT_TOPIC_OUTPUT_RESPONSE+'status', "Offline")
+    _LOGGER.info("Disconnect MQTT Client")
 # ============================
 def on_message(client, userdata, msg):
     mymsg = str(msg.payload.decode("utf-8"))
@@ -179,7 +183,7 @@ def on_message(client, userdata, msg):
             client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "ON")
             client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "1")
             client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_ON" , now.strftime('%Y-%m-%d %H:%M:%S'))
-    	    _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp ON:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+            _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp ON:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
 
         if mymsg == "OFF" or mymsg == "0" or mymsg == "off":
             GPIO.output(i, GPIO.HIGH)
@@ -196,9 +200,9 @@ def on_message(client, userdata, msg):
 try:
     _LOGGER.info("start MQTT Client")
 
-    client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
+    client.on_disconnect = on_disconnect
     client.username_pw_set(mqttconf['username'], mqttconf['password'])
     client.connect(mqttconf['address'], 1883, 60)   #TODO get port from config
     client.will_set(MQTT_TOPIC_OUTPUT_RESPONSE+'status', 'Offline', 0, 1)

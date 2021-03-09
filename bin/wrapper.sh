@@ -40,9 +40,9 @@ case "$1" in
 
 	LOGINF "Starting gpio2mqtt..."
 	if [[ ${DEBUG} -eq 1 ]]; then
-		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel DEBUG --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/config.json > /dev/null 2>&1 &
+		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel DEBUG --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/config.json
 	else
-		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel ERROR --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/config.json > /dev/null 2>&1 &
+		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel ERROR --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/config.json 
 
 	fi
 	LOGEND "gpio2mqtt"
