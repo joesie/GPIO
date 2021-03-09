@@ -12,7 +12,7 @@ PACKAGE=${PLUGINNAME}
 NAME=${PLUGINNAME}_MQTT
 LOGDIR=$LBPLOG/${PLUGINNAME}
 
-LOGSTART "gpio2mqtt"
+
 
 # Debug output
 #STDERR=0
@@ -23,11 +23,11 @@ if [[ ${LOGLEVEL} -eq 7 ]]; then
 	DEBUG=1
 fi
 
-
+LOGSTART "gpio2mqtt"
 case "$1" in
   start|restart)
 
-	if [[ $1 -eq "restart" ]]; then
+	if [ $1 = "restart" ]; then
 		LOGINF "Stopping gpio2mqtt..."
 		pkill -f "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py" >> ${FILENAME} 2>&1
 	fi
