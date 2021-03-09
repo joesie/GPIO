@@ -1,0 +1,34 @@
+#!/bin/bash
+
+PLUGINNAME=REPLACELBPPLUGINDIR
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:$LBHOMEDIR/bin:$LBHOMEDIR/sbin"
+
+ENVIRONMENT=$(cat /etc/environment)
+export $ENVIRONMENT
+
+# Logfile
+. $LBHOMEDIR/libs/bashlib/loxberry_log.sh
+PACKAGE=${PLUGINNAME}
+NAME=${PLUGINNAME}_cron
+LOGDIR=$LBPLOG/${PLUGINNAME}
+
+LOGSTART "cron"
+
+# Debug output
+if [[ ${LOGLEVEL} -eq 7 ]]; then
+	LOGINF "Debugging is enabled! This will produce A LOT messages in your logfile!"
+	STDERR=1
+	DEBUG=1
+fi
+
+
+if [ "$(pgrep -f "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py")" ]; then
+	LOGOK "gpio2mqtt.py is running. Nothing to do."
+	LOGEND "cron"
+else
+	LOGERR "gpio2mqtt.py isn't running - restart!"
+	$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start
+	LOGEND "cron"
+fi
+
+exit 0
