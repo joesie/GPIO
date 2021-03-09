@@ -4,7 +4,7 @@
 # (*AFTER* postinstall but *BEFORE* postupdate). Use with caution and remember,
 # that all systems may be different!
 #
-# Exit code must be 0 if executed successfull. 
+# Exit code must be 0 if executed successfull.
 # Exit code 1 gives a warning but continues installation.
 # Exit code 2 cancels installation.
 #
@@ -60,12 +60,6 @@ echo "<INFO> Plugin SBIN folder is: $PSBIN"
 echo "<INFO> Plugin BIN folder is: $PBIN"
 
 
-echo "<info> Patch PGIO Daemon"
-cp -p -v ./sbin/pigpiod.service /lib/systemd/system/ 
-chmod 644 /lib/systemd/system/pigpiod.service 
-
-#enable autostart 
-systemctl enable pigpiod
 
 # Exit with Status 0
 exit 0
