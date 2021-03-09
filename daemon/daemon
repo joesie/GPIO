@@ -3,21 +3,13 @@
 
 # Will be executed as user "root".
 
-# Name this file "daemon" in your plugin-archive. It will be renamed to NAME
-# during installation
+PLUGINNAME=REPLACELBPPLUGINDIR
+PATH="/sbin:/bin:/usr/sbin:/usr/bin:$LBHOMEDIR/bin:$LBHOMEDIR/sbin"
 
-if [ -x /usr/bin/logger ]
-then
-    /usr/bin/logger "This is just a sample DAEMON script from Sample Plugin"
-fi
+ENVIRONMENT=$(cat /etc/environment)
+export $ENVIRONMENT
 
-#. $LBHOMEDIR/libs/bashlib/notify.sh
-. $LBHOMEDIR/libs/bashlib/loxberry_log.sh
-
-
-
-#$LBHOMEDIR/bin/plugins/gpio/inoutpinconfig.pl
-#$LBHOMEDIR/bin/plugins/gpio/handleinputs.pl &
+$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start
 
 
 exit 0
