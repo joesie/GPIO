@@ -25,6 +25,7 @@ SleepTimeL = 0.2
 MQTT_TOPIC_OUTPUT  = "gpio/set/"
 MQTT_TOPIC_OUTPUT_RESPONSE  = "gpio/"
 MQTT_PATH_STATE_INPUT   = "gpio/"
+client = None
 
 # Standards and Command line
 loglevel="ERROR"
@@ -73,7 +74,7 @@ _LOGGER = setup_logger("GPIO2MQTT")
 # get configuration from mqtt broker and store config in mqttconf variable
 ##
 mqttconf = None;
-with open('/opt/loxberry/data/system/plugindatabase.json') as json_plugindatabase_file:
+with open('/opt/loxberry/data/system/plugindatabase.json') as json_plugindatabase_file: #TODO read Path from env. variable
     plugindatabase = json.load(json_plugindatabase_file)
     mqttconfigdir = plugindatabase['plugins']['07a6053111afa90479675dbcd29d54b5']['directories']['lbpconfigdir']
 
@@ -87,7 +88,7 @@ with open('/opt/loxberry/data/system/plugindatabase.json') as json_plugindatabas
 
     mqttuser = mqttcred['Credentials']['brokeruser']
     mqttpass = mqttcred['Credentials']['brokerpass']
-    mqttaddress = mqttPluginconfig['Main']['brokeraddress']
+    mqttaddress = mqttPluginconfig['Main']['brokeraddress'] #Read and slit adress and port
 
     mqttconf = {
         'username':mqttuser,
@@ -109,17 +110,17 @@ def callback_input(channel):
 
  if GPIO.input(channel): # if SENSOR_PIN of channel == 1 or high
    _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_PATH_STATE_INPUT + str(channel) + ': ON'))
-   publish.single(MQTT_PATH_STATE_INPUT + str(channel) + "/state" , "1", hostname=mqttconf['address'], auth=mqttconf)
-   publish.single(MQTT_PATH_STATE_INPUT + str(channel) + "/stateText" , "ON", hostname=mqttconf['address'], auth=mqttconf)
-   publish.single(MQTT_PATH_STATE_INPUT + str(channel) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'), hostname=mqttconf['address'], auth=mqttconf)
+   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/state" , "1")
+   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/stateText" , "ON")
+   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'))
 
    time.sleep(SleepTimeL);
 
  else: # if SENSOR_PIN of channel != 1 or low
    _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_PATH_STATE_INPUT + str(channel) + ': OFF'))
-   publish.single(MQTT_PATH_STATE_INPUT + str(channel) + "/stateText", "OFF", hostname=mqttconf['address'], auth=mqttconf)
-   publish.single(MQTT_PATH_STATE_INPUT + str(channel) + "/state", "0", hostname=mqttconf['address'], auth=mqttconf)
-   publish.single(MQTT_PATH_STATE_INPUT + str(channel) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'), hostname=mqttconf['address'], auth=mqttconf)
+   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/stateText", "OFF")
+   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/state", "0")
+   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'))
 
    time.sleep(SleepTimeL);
 
@@ -160,6 +161,7 @@ with open('/opt/loxberry/config/plugins/gpio/pluginconfig.json') as json_pcfg_fi
 
 def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC_OUTPUT + "#")
+    client.publish(MQTT_TOPIC_OUTPUT_RESPONSE+'status', "Online")
 
 # ============================
 def on_message(client, userdata, msg):
@@ -174,17 +176,17 @@ def on_message(client, userdata, msg):
         if mymsg == "ON" or mymsg == "1" or mymsg == "on" :
             GPIO.output(i, GPIO.LOW)
             time.sleep(SleepTimeL)
-            publish.single(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "ON", hostname=mqttconf['address'], auth=mqttconf)
-            publish.single(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "1"     , hostname=mqttconf['address'], auth=mqttconf)
-            publish.single(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_ON" , now.strftime('%Y-%m-%d %H:%M:%S'), hostname=mqttconf['address'], auth=mqttconf)
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "ON")
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "1")
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_ON" , now.strftime('%Y-%m-%d %H:%M:%S'))
     	    _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp ON:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
 
         if mymsg == "OFF" or mymsg == "0" or mymsg == "off":
             GPIO.output(i, GPIO.HIGH)
             time.sleep(SleepTimeL)
-            publish.single(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "OFF", hostname=mqttconf['address'], auth=mqttconf)
-            publish.single(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "0"      , hostname=mqttconf['address'], auth=mqttconf)
-            publish.single(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_OFF"  , now.strftime('%Y-%m-%d %H:%M:%S'), hostname=mqttconf['address'], auth=mqttconf)
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "OFF")
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "0")
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_OFF"  , now.strftime('%Y-%m-%d %H:%M:%S'))
             _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp OFF:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
 
 # ============================
@@ -198,7 +200,8 @@ try:
     client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(mqttconf['username'], mqttconf['password'])
-    client.connect(mqttconf['address'], 1883, 60)
+    client.connect(mqttconf['address'], 1883, 60)   #TODO get port from config
+    client.will_set(MQTT_TOPIC_OUTPUT_RESPONSE+'status', 'Offline', 0, 1)
     client.loop_forever()
 except KeyboardInterrupt:
     _LOGGER.info("Stop MQTT Client")
