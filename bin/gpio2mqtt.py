@@ -3,7 +3,8 @@
 ## Description
 ## GPIO-MQTT gateway
 ##
-## prerequisites: 	python, PIP
+## prerequisites:
+##          python, PIP
 ##			pip install rpi.gpio
 ## 			pip install paho-mqtt
 
@@ -11,6 +12,7 @@ import paho.mqtt.client as mqtt
 import paho.mqtt.publish as publish
 from time import sleep
 import time
+import threading
 from datetime import datetime
 import RPi.GPIO as GPIO
 import json
@@ -18,30 +20,40 @@ import logging
 
 import getopt
 import sys
+import socket
 
 SleepTimeL = 0.2
 
 #Configuration MQTT Topics
-MQTT_TOPIC_OUTPUT  = "gpio/set/"
-MQTT_TOPIC_OUTPUT_RESPONSE  = "gpio/"
-MQTT_PATH_STATE_INPUT   = "gpio/"
+hostname = socket.gethostname()
+MQTT_TOPIC_OUTPUT  = hostname + "/gpio/set/"
+MQTT_TOPIC_OUTPUT_RESPONSE  = hostname + "/gpio/"
+MQTT_PATH_STATE_INPUT   = hostname + "/gpio/"
+MQTT_DEFAULT_PORT = 1883
 client = mqtt.Client()
 
-# Standards and Command line
+# ======================
+##
+# handle start arguments
+##
 loglevel="ERROR"
 logfile=""
-opts, args = getopt.getopt(sys.argv[1:], 'f:l:c:', ['logfile=', 'loglevel=', 'configfile='])
+logfileArg = ""
+lbhomedir = ""
+configfile = ""
+opts, args = getopt.getopt(sys.argv[1:], 'f:l:c:h:', ['logfile=', 'loglevel=', 'configfile=', 'lbhomedir='])
 for opt, arg in opts:
     if opt in ('-f', '--logfile'):
         logfile=arg
+        logfileArg = arg
     elif opt in ('-l', '--loglevel'):
         loglevel=arg
     elif opt in ('-c', '--configfile'):
         configfile=arg
-## END: ADDITIONAL CODE
+    elif opt in ('-h', '--lbhomedir'):
+        lbhomedir=arg
 
 # ==============
-
 ##
 # Setup logger function
 ##
@@ -50,11 +62,13 @@ def setup_logger(name):
     global loglevel
     global logfile
 
+    logging.captureWarnings(1)
     logger = logging.getLogger(name)
     handler = logging.StreamHandler()
 
     logger.addHandler(handler)
     logger.setLevel(logging.DEBUG)
+
 
     # Logging with standard LoxBerry log format
     numeric_loglevel = getattr(logging, loglevel.upper(), None)
@@ -67,6 +81,8 @@ def setup_logger(name):
     return logger
 
 _LOGGER = setup_logger("GPIO2MQTT")
+_LOGGER.debug("logfile: " + logfileArg)
+_LOGGER.debug("loglevel: " + loglevel)
 
 
 # ============================
@@ -74,7 +90,7 @@ _LOGGER = setup_logger("GPIO2MQTT")
 # get configuration from mqtt broker and store config in mqttconf variable
 ##
 mqttconf = None;
-with open('/opt/loxberry/data/system/plugindatabase.json') as json_plugindatabase_file: #TODO read Path from env. variable
+with open(lbhomedir + '/data/system/plugindatabase.json') as json_plugindatabase_file:
     plugindatabase = json.load(json_plugindatabase_file)
     mqttconfigdir = plugindatabase['plugins']['07a6053111afa90479675dbcd29d54b5']['directories']['lbpconfigdir']
 
@@ -88,19 +104,31 @@ with open('/opt/loxberry/data/system/plugindatabase.json') as json_plugindatabas
 
     mqttuser = mqttcred['Credentials']['brokeruser']
     mqttpass = mqttcred['Credentials']['brokerpass']
-    mqttaddress = mqttPluginconfig['Main']['brokeraddress'] #Read and slit adress and port
+    mqttaddressArray = mqttPluginconfig['Main']['brokeraddress'].split(":")
+    mqttPort = MQTT_DEFAULT_PORT
+    if len(mqttaddressArray) > 1:
+        mqttPort = x[1]
 
     mqttconf = {
         'username':mqttuser,
         'password':mqttpass,
-        'address': mqttaddress
+        'address': mqttaddressArray[0],
+        'port': mqttPort
     }
 
-# If no mqtt config found leave the script with log warning
+# If no mqtt config found leave the script with log entry
 if mqttconf is None:
-    _LOGGER.critical("No MQTT config found. Deamon stop working")
+    _LOGGER.critical("No MQTT config found. Daemon stop working")
     sys.exit(-1)
+
 # ============================
+##
+# MQTT Heartbeat
+#
+def mqtt_heatbeat(name):
+    while(1):
+        client.publish(MQTT_TOPIC_OUTPUT_RESPONSE+'status', "Online")
+        time.sleep(10)
 
 ##
 # Callback function for interrupt handling
@@ -125,12 +153,11 @@ def callback_input(channel):
    time.sleep(SleepTimeL);
 
 # ============================
-
 ##
 # setup GPIOS
 ##
 GPIO.setmode(GPIO.BCM)
-with open('/opt/loxberry/config/plugins/gpio/pluginconfig.json') as json_pcfg_file:
+with open(configfile) as json_pcfg_file:
     pcfg = json.load(json_pcfg_file)
     gpio = pcfg['gpio']
 
@@ -158,15 +185,12 @@ with open('/opt/loxberry/config/plugins/gpio/pluginconfig.json') as json_pcfg_fi
         _LOGGER.debug("set Pin " + channel['pin'] + " as Output")
 
 # ============================
-
+##
+# definition of mqtt callbacks
+##
 def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC_OUTPUT + "#")
-    client.publish(MQTT_TOPIC_OUTPUT_RESPONSE+'status', "Online")
-# ============================
 
-def on_disconnect(client, userdata, flags, rc):
-    client.publish(MQTT_TOPIC_OUTPUT_RESPONSE+'status', "Offline")
-    _LOGGER.info("Disconnect MQTT Client")
 # ============================
 def on_message(client, userdata, msg):
     mymsg = str(msg.payload.decode("utf-8"))
@@ -202,10 +226,13 @@ try:
 
     client.on_connect = on_connect
     client.on_message = on_message
-    client.on_disconnect = on_disconnect
     client.username_pw_set(mqttconf['username'], mqttconf['password'])
-    client.connect(mqttconf['address'], 1883, 60)   #TODO get port from config
-    client.will_set(MQTT_TOPIC_OUTPUT_RESPONSE+'status', 'Offline', 0, 1)
+    client.will_set(MQTT_TOPIC_OUTPUT_RESPONSE+'status', 'Offline', qos=0, retain=True)
+    client.connect(mqttconf['address'], mqttconf['port'], 60)
+
+    mqtt_heatbeatThread = threading.Thread(target=mqtt_heatbeat, args=(1,))
+    mqtt_heatbeatThread.start();
+
     client.loop_forever()
 except KeyboardInterrupt:
     _LOGGER.info("Stop MQTT Client")
