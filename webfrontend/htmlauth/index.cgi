@@ -117,7 +117,7 @@ if ( param('saveIoConfig') ) {
 		my $saved = $jsonobj->write();
 		LOGINF "Configuration saved $saved";
 
-  	system($^X, "$lbpbindir/inoutpinconfig.pl"); #FIXME This file is deprecated
+  	#system($^X, "$lbpbindir/inoutpinconfig.pl"); #FIXME This file is deprecated
   	$message = "Eingaben wurden erfolgreich gespeichert";
   	$messagetype = "info";
 	} else{
