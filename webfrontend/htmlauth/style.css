@@ -21,35 +21,28 @@
 	text-align: right;
 }
 
-.separatingline{
-	border-bottom: 2px solid #cdcdcd;
-}
-
-.tableheadline {
-	text-align: center;
-}
-
 .help {
 	font-size: 0.75em;
     margin-top: 5px;
 }
 
-
-.wiring legend{
-	float: left;
-    line-height: 60px;
-    vertical-align: middle;
-}
-.wiring.ui-select{
+.wiring {
 	float: right;
-    width: 60%;
-} 
+  width: 45%;
+}
+
 .radiocontainer{
 	display: flex;
   align-items: center;
-  justify-content: center;	
+  justify-content: center;
 }
-   
 
+.gpioconf{
+	width: 50%;
+  float: left;
+  margin: 0em 2% 0 0;
+}
 
-    
+.button{
+	width: 300px;
+}
