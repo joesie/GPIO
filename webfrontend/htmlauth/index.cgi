@@ -101,15 +101,6 @@ if ( param('saveIoConfig') ) {
 		}
 	}
 
-	# main settings
-	my $input_prefixLength=length(param('input_prefix'));
-	if($input_prefixLength <=0){
-		$messagetype = "error";
-		$inputPrefixErrorMessage = "Das Feld darf nicht leer sein!";
-		$inputPrefixErrorClass = "error";
-	}
-	$pcfg->{main}->{prefix} = param('input_prefix');
-  $pcfg->{main}->{samplingrate} = param('input_samplingrate');
   $pcfg->{main}->{miniserver} = param('selMiniServer');
 
 	if($messagetype ne("error")){
@@ -117,7 +108,6 @@ if ( param('saveIoConfig') ) {
 		my $saved = $jsonobj->write();
 		LOGINF "Configuration saved $saved";
 
-  	system($^X, "$lbpbindir/inoutpinconfig.pl"); #FIXME This file is deprecated
   	$message = "Eingaben wurden erfolgreich gespeichert";
   	$messagetype = "info";
 	} else{
@@ -257,19 +247,11 @@ my @inputConfigArray = &createInputOutputConfig($pcfg->{gpio}->{inputs}->{count}
 $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
-$template->param("input_prefix" => $pcfg->{main}->{prefix});
-$template->param("input_prefix_error_message" => $inputPrefixErrorMessage);
-$template->param("input_prefix_error_class" => $inputPrefixErrorClass);
-
-my @samplingRates = &samplingRates();
-$template->param("input_samplingrate" => \@samplingRates);
 
 $template->param( "selMiniServer" => $selMiniServer );
 
 # Write template
 print $template->output();
-
-print LoxBerry::Web::logfile_button_html( NAME => 'Input_handler' );
 
 # set footer for our side
 LoxBerry::Web::lbfooter();
