@@ -1,163 +1,93 @@
 <div role=\ "main\" class=\ "ui-content\">
-        <div class=\ "ui-body ui-body-a ui-corner-all loxberry-logo\">
-                <div style=\ "margin: 5%;\">
-                			<p class= "<TMPL_VAR NAME=MESSAGETYPE> maininfo"><TMPL_VAR NAME=MESSAGE></p>
-                        <h2>Einstellungen</h2>
-                        <div>
-                        		<p>In diesem Bereich bitte die korrekte Anzahl der benötigten Ein- und Ausgänge angeben. Nach dem speichern wird die Kanalkonfiguration angepasst </p>
-                        </div>
-                        <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi" class="separatingline">
-                                <input type="hidden" id="saveCount" name="saveCount" value="saveCount">
-                                <div class="form-group">
-                                        <table class="formtable" border="0" width="100%">
-                                                <tr>
-                                                        <td width="25%" style="text-align: right;">
-                                                                <label id="input_count_label">Anzahl Eingänge:</label>
-                                                        </td>
-                                                        <td width="15%" colspan="2">
-                                                                <select name="input_count" id="input_count">
-                                                                        <TMPL_LOOP NAME=select_input_count>
-                                                                                <option value='<TMPL_VAR NAME=COUNT>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT></option>
-                                                                        </TMPL_LOOP>
-                                                                </select>
+    <div class=\ "ui-body ui-body-a ui-corner-all loxberry-logo\">
+        <div style=\ "margin: 5%;\">
+    			<p class= "<TMPL_VAR NAME=MESSAGETYPE> maininfo"><TMPL_VAR NAME=MESSAGE></p>
+            <h2>Einstellungen</h2>
+            <div>
+            		<p>In diesem Bereich bitte die korrekte Anzahl der benötigten Ein- und Ausgänge angeben. Nach dem speichern wird die Kanalkonfiguration angepasst </p>
+            </div>
+            <form method="post" data-ajax="false" name="count_form" id="count_form" action="./index.cgi" class="separatingline">
+              <input type="hidden" id="saveCount" name="saveCount" value="saveCount">
+              <div class="ui-field-contain">
+                <label id="input_count_label">Anzahl Eingänge:</label>
+                <select name="input_count" id="input_count">
+                  <TMPL_LOOP NAME=select_input_count>
+                    <option value='<TMPL_VAR NAME=COUNT>'
+                      <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT>
+                    </option>
+                  </TMPL_LOOP>
+                </select>
+              </div>
+              <div class="ui-field-contain">
+                <label id="input_count_label">Anzahl Ausgänge:</label>
+                  <select name="output_count" id="output_count">
+                    <TMPL_LOOP NAME=SELECT_OUTPUT_COUNT>
+                      <option value='<TMPL_VAR NAME=COUNT>'
+                        <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT>
+                      </option>
+                    </TMPL_LOOP>
+                  </select>
+              </div>
 
-                                                        </td>
-                                                        <td width="20%">
-                                                                &nbsp;
-                                                        </td>
-                                                        <td width="25%" style="text-align: right;">
-                                                                <label id="output_count_label">Anzahl Ausgänge:</label>
-                                                        </td>
-                                                        <td width="15%" colspan="2">
-                                                                <select name="output_count" id="output_count">
-                                                                        <TMPL_LOOP NAME=SELECT_OUTPUT_COUNT>
-                                                                                <option value='<TMPL_VAR NAME=COUNT>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=COUNT></option>
-                                                                        </TMPL_LOOP>
-                                                                </select>
-                                                        </td>
-                                                </tr>
+              <center>
+                <button class="button" type="reset" form="count_form" id="btnreset" data-role="button" data-inline="true"
+              	data-mini="true" data-icon="check">Reset</button>
+              	<button class="button" type="submit" form="count_form" id="btnsubmit" data-role="button" data-inline="true"
+              	data-mini="true" data-icon="check">Speichern</button>
+              </center>
+            </form>
 
-                                        </table>
+            <h2>Kanalkonfiguration</h2>
+            <div>
+            		<p>Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen.
+            		In das Eingabefeld wird hierfür für jeden Kanal des verwendete GPIO Anschluss eingetragen. Die GPIO Pin Belegung kann <a href="https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm">hier</a> nachgelesen werden.</p>
+            </div>
+            <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
+        		<input type="hidden" id="saveIoConfig" name="saveIoConfig" value="saveIoConfig">
+        		<div class="class="ui-field-contain"">
+	          <h3>Eingänge</h3>
 
+       			<TMPL_LOOP NAME=number_of_inputs>
+       				<div class=" ui-field-contain">
+       					<label class= "<TMPL_VAR NAME=class>">Eingang <TMPL_VAR NAME=current>:</label>
+                <fieldset>
+                  <div class="gpioconf <TMPL_VAR NAME=class>">
+                    <input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
+       						  <p><TMPL_VAR NAME=errormessage></p>
+                  </div>
+       						<div class="wiring">
+         						<TMPL_VAR SELECTLIST>
+       						</div>
+                </fieldset>
+              </div>
+       			</TMPL_LOOP>
+            <h3>Ausgänge</h3>
 
-                                        <table class="formtable" border="0" width="100%">
-                                                <tr>
-                                                        <td width="40%">&nbsp</td>
-                                                        <td width="10%" colspan="2">
-                                                                <input id="submit" name="submit" type="reset" value="Abbrechen">
-                                                        </td>
-                                                        <td width="10%" colspan="2">
-                                                                <input id="submit" name="submit" type="submit" value="Speichern">
-                                                        </td>
-                                                        <td width="40%">&nbsp</td>
-                                                </tr>
-                                        </table>
-                                </div>
-                        </form>
-                        <h2>Kanalkonfiguration</h2>
-                        <div>
-                        		<p>Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen.
-                        		In das Eingabefeld wird hierfür für jeden Kanal des verwendete GPIO Anschluss eingetragen. Die GPIO Pin Belegung kann <a href="https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm">hier</a> nachgelesen werden.</p>
-                        </div>
-                        <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
-                        		<input type="hidden" id="saveIoConfig" name="saveIoConfig" value="saveIoConfig">
-                        		<div class="form-group">
-	                        <table class="formtable" border="0" width="100%">
-				                 <tr>
-				                 	<td width="50%" style="vertical-align: top;">
-				                 		<h2 class="tableheadline">Eingänge</h2>
-				                 		<table class="formtable" border="0" width="100%">
-				                 			<tr>
-				                 				<td></td>
-				                 				<td>GPIO Nummer</td>
-				                 			</tr>
-				                 			<TMPL_LOOP NAME=number_of_inputs>
-				                 				<tr >
-				                 					<td width="50%" class= "<TMPL_VAR NAME=class> inputlabel">Eingänge <TMPL_VAR NAME=current>:</td>
-				                 					<td width="50%" class= "<TMPL_VAR NAME=class> separatingline">
-				                 						<input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
-				                 						<p><TMPL_VAR NAME=errormessage></p>
-				                 						<div class="wiring">
-  				                 						<fieldset>
-  				                 							<legend>Beschaltung:</legend>
-  													 	          <TMPL_VAR SELECTLIST>
-  														        </fieldset>
-				                 						</div>
-				                 					</td>
-				                 				</tr>
-				                 			</TMPL_LOOP>
-				                 			<tr><td colspan=2><p>Allgemeine Einstellungen</td></tr>
-				                 			<tr>
-				                 				<td class= "<TMPL_VAR NAME=input_prefix_error_class> inputlabel">Präfix:</td>
-				                 				<td class= "<TMPL_VAR NAME=input_prefix_error_class>">
-				                 					<input type='text' id="input_prefix" name="input_prefix" value="<TMPL_VAR input_prefix>"></input>
-				                 					<p><TMPL_VAR NAME=input_prefix_error_message></p>
-				                 					</td>
-				                 			</tr>
-				                 			<tr><td colspan=2><p class="help">Der Präfix dient bei Verwendung mehrerer Loxberrys mit diesem Plugin, die Eingänge dem Gerät zuzuordnen</p> </td></tr>
-				                 			<tr>
-				                 				<td class= "<TMPL_VAR NAME=class> inputlabel">Abtastintervall:</td>
-				                 				<td>
-				                 					<select name="input_samplingrate" id="input_samplingrate">
-                                                          <TMPL_LOOP NAME=input_samplingrate>
-                                                                  <option value='<TMPL_VAR NAME=VALUE>' <TMPL_VAR NAME=CHOOSED>><TMPL_VAR NAME=LABEL></option>
-                                                          </TMPL_LOOP>
-                                                     </select>
+       			<TMPL_LOOP NAME=number_of_outputs>
+       				<div class="<TMPL_VAR NAME=class> ui-field-contain">
+       					<label class= "<TMPL_VAR NAME=class>">Ausgang <TMPL_VAR NAME=current>:</label>
+                <fieldset>
+                  <input class= "<TMPL_VAR NAME=class>" type='text' id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
+       						<p><TMPL_VAR NAME=errormessage></p>
+                </fieldset>
+       				</div>
+       			</TMPL_LOOP>
 
-				                 				</td>
-				                 			</tr>
-				                 			<tr><td colspan=2> <p class="help">Das Abtastintervall sollte immer halb so lang sein, wie die Signallänge, die am Eingang minimal anliegt. Nur so ist gewährleistet, dass der Wert zuverlässig gelesen werden kann. Doch Achtung: ein kurzes Intervall führt zu einer strken
-				                 				Belastung des Prozessors.</p></td></tr>
-				                 			<tr>
-				                 				<td class= "<TMPL_VAR NAME=class> inputlabel">Miniserver:</td>
-				                 				<td>
-				                 					<TMPL_VAR selMiniServer>
+            <h2>Allgemeine Einstellungen</h2>
+            <div class="ui-field-contain">
+              <label class= "<TMPL_VAR NAME=class> inputlabel">Miniserver:</label>
+                <TMPL_VAR selMiniServer>
+            </div>
 
-				                 				</td>
-				                 			</tr>
-
-			                 			</table>
+            <center>
+              <button class="button" type="reset" form="main_form" id="btnreset2" data-role="button" data-inline="true"
+              data-mini="true" data-icon="check">Reset</button>
+              <button class="button" type="submit" form="main_form" id="btnsubmit2" data-role="button" data-inline="true"
+              data-mini="true" data-icon="check">Speichern</button>
+            </center>
 
 
-				                 	</td>
-				                 	<td width="50%" style="vertical-align: top;">
-				                 		<h2 class="tableheadline">Ausgänge</h2>
-				                 		<table class="formtable" border="0" width="100%">
-				                 			<tr>
-				                 				<td></td>
-				                 				<td>GPIO Nummer</td>
-				                 			</tr>
-				                 			<TMPL_LOOP NAME=number_of_outputs>
-				                 				<tr>
-				                 					<td width="50%" class= "<TMPL_VAR NAME=class> inputlabel">Ausgang <TMPL_VAR NAME=current>:</td>
-				                 					<td width="50%" class= "<TMPL_VAR NAME=class>">
-				                 						<input type='text' id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
-				                 						<p><TMPL_VAR NAME=errormessage></p>
-				                 					</td>
-				                 				</tr>
-				                 			</TMPL_LOOP>
-				                 		</table>
-				                 	</td>
-
-				                 </tr>
-				           	</table>
-				           	<table class="formtable" border="0" width="100%">
-                                 <tr>
-                                         <td width="40%">&nbsp</td>
-                                         <td width="10%" colspan="2">
-                                                 <input id="submit2" name="submit2" type="reset" value="Abbrechen">
-                                         </td>
-                                         <td width="10%" colspan="2">
-                                                 <input id="submit2" name="submit2" type="submit" value="Speichern">
-                                         </td>
-                                         <td width="40%">&nbsp</td>
-                                 </tr>
-                         	</table>
-                        </div>
-                        </form>
-
-
-
-                </div>
+                    </form>
+              </div>
         </div>
 </div>
