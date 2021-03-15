@@ -9,7 +9,5 @@
    },
    "main" : {
       "miniserver" : "1",
-      "prefix" : "GPIO",
-      "samplingrate" : "0.1"
    }
 }
