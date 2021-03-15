@@ -108,7 +108,9 @@ if ( param('saveIoConfig') ) {
 		my $saved = $jsonobj->write();
 		LOGINF "Configuration saved $saved";
 
-  	$message = "Eingaben wurden erfolgreich gespeichert";
+	#	system("bash $lbpbindir/wrapper.sh restart"); #FIXME Can't write this line without error
+	#	system("bash $lbpbindir/wrapper.sh restart > /dev/null 2>&1");
+		$message = "Eingaben wurden erfolgreich gespeichert";
   	$messagetype = "info";
 	} else{
 		$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
