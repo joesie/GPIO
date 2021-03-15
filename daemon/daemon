@@ -9,7 +9,7 @@ PATH="/sbin:/bin:/usr/sbin:/usr/bin:$LBHOMEDIR/bin:$LBHOMEDIR/sbin"
 ENVIRONMENT=$(cat /etc/environment)
 export $ENVIRONMENT
 
-$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start
+su loxberry -c "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start"
 
 
 exit 0
