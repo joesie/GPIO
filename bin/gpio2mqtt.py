@@ -182,6 +182,7 @@ with open(configfile) as json_pcfg_file:
         channel = outputs[key]
 
         GPIO.setup(int(channel['pin']), GPIO.OUT)
+        GPIO.output(int(channel['pin']), GPIO.HIGH) #Default GPIO High is off
         _LOGGER.debug("set Pin " + channel['pin'] + " as Output")
 
 # ============================
@@ -199,23 +200,31 @@ def on_message(client, userdata, msg):
     _LOGGER.debug("Topic: " + mytopic + " with Payload: " + mymsg + "!")
 
 	# Search for topic in List of available output pins (BCM names) and set gpio to state LOW or HIGH
-    for i in range(2, 27):
+    for i in range(0, 27):
       if mytopic == MQTT_TOPIC_OUTPUT + str(i) :
         if mymsg == "ON" or mymsg == "1" or mymsg == "on" :
-            GPIO.output(i, GPIO.LOW)
-            time.sleep(SleepTimeL)
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "ON")
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "1")
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_ON" , now.strftime('%Y-%m-%d %H:%M:%S'))
-            _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp ON:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+            try:
+                GPIO.output(i, GPIO.LOW)
+                time.sleep(SleepTimeL)
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "ON")
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "1")
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_ON" , now.strftime('%Y-%m-%d %H:%M:%S'))
+                _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp ON:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+            except Exception as e:
+                _LOGGER.exception(str(e))
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
 
         if mymsg == "OFF" or mymsg == "0" or mymsg == "off":
-            GPIO.output(i, GPIO.HIGH)
-            time.sleep(SleepTimeL)
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "OFF")
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "0")
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_OFF"  , now.strftime('%Y-%m-%d %H:%M:%S'))
-            _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp OFF:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+            try:
+                GPIO.output(i, GPIO.HIGH)
+                time.sleep(SleepTimeL)
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "OFF")
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "0")
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_OFF"  , now.strftime('%Y-%m-%d %H:%M:%S'))
+                _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp OFF:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+            except Exception as e:
+                _LOGGER.exception(str(e))
+                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
 
 # ============================
 ##
