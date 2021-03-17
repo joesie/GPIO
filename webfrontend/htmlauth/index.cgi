@@ -108,7 +108,7 @@ if ( param('saveIoConfig') ) {
 		my $saved = $jsonobj->write();
 		LOGINF "Configuration saved $saved";
 
-		system("$lbpbindir/wrapper.sh restart"); 
+		system("$lbpbindir/wrapper.sh restart > /dev/null 2>&1"); 
 		#my $output = qx ($lbpbindir/wrapper.sh restart);
 		$message = "Eingaben wurden erfolgreich gespeichert";
   		$messagetype = "info";
