@@ -26,9 +26,12 @@ if [ "$(pgrep -f "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py")" ]; then
 	LOGOK "gpio2mqtt.py is running. Nothing to do."
 	LOGEND "cron"
 else
-	LOGERR "gpio2mqtt.py isn't running - restart!"
-	$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start
-	LOGEND "cron"
+	sleep 1
+	if [ ! "$(pgrep -f "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py")" ]; then
+		LOGERR "gpio2mqtt.py isn't running - restart!"
+		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start
+		LOGEND "cron"
+		exit 0
 fi
 
 exit 0
