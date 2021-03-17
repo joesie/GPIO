@@ -34,7 +34,7 @@ case "$1" in
 	fi
 
 	if [ "$(pgrep -f "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py")" ]; then
-		LOGERR "gpio2mqtt.py already running."
+		LOGINF "gpio2mqtt.py already running."
 		LOGEND "gpio2mqtt"
 		exit 0
 	fi
