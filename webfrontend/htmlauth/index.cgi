@@ -63,7 +63,7 @@ if ( param('saveCount') ) {
 
   $pcfg->{gpio}->{inputs}->{count} = "$inputCount";
   $pcfg->{gpio}->{outputs}->{count}= "$outputCount";
-	my $saved = $jsonobj->write();
+  my $saved = $jsonobj->write();
   LOGINF "Configuration saved $saved";
 }
 
@@ -108,10 +108,10 @@ if ( param('saveIoConfig') ) {
 		my $saved = $jsonobj->write();
 		LOGINF "Configuration saved $saved";
 
-	#	system("bash $lbpbindir/wrapper.sh restart"); #FIXME Can't write this line without error
-		my $output = qx ($lbpbindir/wrapper.sh restart);
+		system("$lbpbindir/wrapper.sh restart"); 
+		#my $output = qx ($lbpbindir/wrapper.sh restart);
 		$message = "Eingaben wurden erfolgreich gespeichert";
-  	$messagetype = "info";
+  		$messagetype = "info";
 	} else{
 		$message = "Fehler beim Speichern. Bitte die Eingaben überprüfen!";
 	}
