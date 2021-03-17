@@ -24,6 +24,7 @@ if [[ ${LOGLEVEL} -eq 7 ]]; then
 fi
 
 LOGSTART "gpio2mqtt"
+
 case "$1" in
   start|restart)
 
@@ -40,11 +41,11 @@ case "$1" in
 
 	LOGINF "Starting gpio2mqtt..."
 	if [[ ${DEBUG} -eq 1 ]]; then
-		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel DEBUG --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/pluginconfig.json --lbhomedir $LBHOMEDIR &
+		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel DEBUG --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/pluginconfig.json --lbhomedir $LBHOMEDIR > /dev/null 2>&1 &
 	else
-		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel ERROR --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/pluginconfig.json --lbhomedir $LBHOMEDIR &
-
+		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel ERROR --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/pluginconfig.json --lbhomedir $LBHOMEDIR > /dev/null 2>&1 &
 	fi
+
 	LOGEND "gpio2mqtt"
         exit 0
         ;;
@@ -65,7 +66,7 @@ case "$1" in
         ;;
 
   *)
-        echo "Usage: $0 [start|stop]" >&2
+        echo "Usage: $0 [start|stop|restart]" >&2
 	LOGINF "No command given. Exiting."
 	LOGEND "gpio2mqtt"
         exit 3
