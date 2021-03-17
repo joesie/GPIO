@@ -36,7 +36,7 @@ case "$1" in
 	if [ "$(pgrep -f "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py")" ]; then
 		LOGERR "gpio2mqtt.py already running."
 		LOGEND "gpio2mqtt"
-		exit 1
+		exit 0
 	fi
 
 	LOGINF "Starting gpio2mqtt..."
@@ -69,7 +69,7 @@ case "$1" in
         echo "Usage: $0 [start|stop|restart]" >&2
 	LOGINF "No command given. Exiting."
 	LOGEND "gpio2mqtt"
-        exit 3
+        exit 0
   ;;
 
 esac
