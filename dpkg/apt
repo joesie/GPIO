@@ -6,3 +6,4 @@
 python3-pigpio
 python3-paho-mqtt
 python3-colorlog
+rpi.gpio
