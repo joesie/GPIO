@@ -108,7 +108,7 @@ if ( param('saveIoConfig') ) {
 		my $saved = $jsonobj->write();
 		LOGINF "Configuration saved $saved";
 
-		system("$lbpbindir/wrapper.sh restart > /dev/null 2>&1"); 
+		system("$lbpbindir/wrapper.sh restart > /dev/null 2>&1");
 		#my $output = qx ($lbpbindir/wrapper.sh restart);
 		$message = "Eingaben wurden erfolgreich gespeichert";
   		$messagetype = "info";
@@ -202,28 +202,6 @@ sub createInputOutputConfig{
   return @result;
 }
 
-# ---------------------------------------------------
-# Control for "selMiniServer" Dropdown
-# ---------------------------------------------------
-
-my %miniservers = LoxBerry::System::get_miniservers();
-my @miniserverarray;
-my %miniserverhash;
-
-foreach my $ms (sort keys %miniservers)
-{
-    push @miniserverarray, "$ms";
-    $miniserverhash{"$ms"} = $miniservers{$ms}{Name};
-}
-
-my $selMiniServer = $cgi->popup_menu(
-      -name    => 'selMiniServer',
-      -values  => \@miniserverarray,
-      -labels  => \%miniserverhash,
-      -default => $pcfg->{main}->{miniserver},
-  );
-
-
 ##
 #handle Template and render index page
 ##
@@ -250,7 +228,7 @@ $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
 
-$template->param( "selMiniServer" => $selMiniServer );
+
 
 # Write template
 print $template->output();
