@@ -29,6 +29,7 @@ hostname = socket.gethostname()
 MQTT_TOPIC_OUTPUT  = hostname + "/gpio/set/"
 MQTT_TOPIC_OUTPUT_RESPONSE  = hostname + "/gpio/"
 MQTT_PATH_STATE_INPUT   = hostname + "/gpio/"
+MQTT_RESPONSE_STATE = hostname + "/gpio/"
 MQTT_DEFAULT_PORT = 1883
 client = mqtt.Client()
 
@@ -36,6 +37,8 @@ client = mqtt.Client()
 ##
 # handle start arguments
 ##
+inputs = None
+outputs = None
 loglevel="ERROR"
 logfile=""
 logfileArg = ""
@@ -226,6 +229,41 @@ def on_message(client, userdata, msg):
                 _LOGGER.exception(str(e))
                 client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
 
+#=============================
+##
+# send MQTT response
+##
+def send_mqtt_pin_value(pin, value):
+    now = datetime.now()
+    if(value):
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state" , "1")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText" , "ON")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'))
+        _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': ON'))
+    else:
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText", "OFF")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state", "0")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'))
+        _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': OFF'))
+#=============================
+##
+#  send the current state of configured inputs and outputs as MQTT message
+##
+def send_state():
+    if inputs is not None:
+        for i in range(0, int(inputs['count'])):
+            key = "channel_{}".format(i)
+            channel = inputs[key]
+            value = GPIO.input(int(channel['pin']))
+            send_mqtt_pin_value(int(channel['pin']), value)
+
+    if outputs is not None:
+        for i in range(0, int(outputs['count'])):
+            key = "channel_{}".format(i)
+            channel = outputs[key]
+            value = GPIO.input(int(channel['pin']))
+            # invert value because a LOW value means the output is ON
+            send_mqtt_pin_value(int(channel['pin']), not value)
 # ============================
 ##
 # start mqtt Client
@@ -240,7 +278,8 @@ try:
     client.connect(mqttconf['address'], mqttconf['port'], 60)
 
     mqtt_heatbeatThread = threading.Thread(target=mqtt_heatbeat, args=(1,))
-    mqtt_heatbeatThread.start();
+    mqtt_heatbeatThread.start()
+    send_state()
 
     client.loop_forever()
 except KeyboardInterrupt:
