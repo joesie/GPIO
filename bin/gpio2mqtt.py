@@ -124,6 +124,23 @@ if mqttconf is None:
     _LOGGER.critical("No MQTT config found. Daemon stop working")
     sys.exit(-1)
 
+#=============================
+##
+# send MQTT response for given pin and value
+##
+def send_mqtt_pin_value(pin, value):
+    now = datetime.now()
+    if(value):
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state" , "1")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText" , "ON")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'))
+        _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': ON'))
+    else:
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText", "OFF")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state", "0")
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'))
+        _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': OFF'))
+
 # ============================
 ##
 # MQTT Heartbeat
@@ -140,19 +157,10 @@ def callback_input(channel):
  now = datetime.now()
 
  if GPIO.input(channel): # if SENSOR_PIN of channel == 1 or high
-   _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_PATH_STATE_INPUT + str(channel) + ': ON'))
-   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/state" , "1")
-   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/stateText" , "ON")
-   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'))
-
-   time.sleep(SleepTimeL);
-
+    send_mqtt_pin_value(i, 1)
+    time.sleep(SleepTimeL);
  else: # if SENSOR_PIN of channel != 1 or low
-   _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_PATH_STATE_INPUT + str(channel) + ': OFF'))
-   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/stateText", "OFF")
-   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/state", "0")
-   client.publish(MQTT_PATH_STATE_INPUT + str(channel) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'))
-
+   send_mqtt_pin_value(i, 0)
    time.sleep(SleepTimeL);
 
 # ============================
@@ -209,10 +217,7 @@ def on_message(client, userdata, msg):
             try:
                 GPIO.output(i, GPIO.LOW)
                 time.sleep(SleepTimeL)
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "ON")
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "1")
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_ON" , now.strftime('%Y-%m-%d %H:%M:%S'))
-                _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp ON:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+                send_mqtt_pin_value(i, 1)
             except Exception as e:
                 _LOGGER.exception(str(e))
                 client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
@@ -221,30 +226,12 @@ def on_message(client, userdata, msg):
             try:
                 GPIO.output(i, GPIO.HIGH)
                 time.sleep(SleepTimeL)
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "OFF")
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/state", "0")
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/timestamp_OFF"  , now.strftime('%Y-%m-%d %H:%M:%S'))
-                _LOGGER.debug(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/|-- Timestamp OFF:" +  now.strftime('%Y-%m-%d %H:%M:%S'))
+                send_mqtt_pin_value(i, 0)
             except Exception as e:
                 _LOGGER.exception(str(e))
                 client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
 
-#=============================
-##
-# send MQTT response
-##
-def send_mqtt_pin_value(pin, value):
-    now = datetime.now()
-    if(value):
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state" , "1")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText" , "ON")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'))
-        _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': ON'))
-    else:
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText", "OFF")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state", "0")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'))
-        _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': OFF'))
+
 #=============================
 ##
 #  send the current state of configured inputs and outputs as MQTT message
