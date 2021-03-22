@@ -4,7 +4,7 @@
     			<p class= "<TMPL_VAR NAME=MESSAGETYPE> maininfo"><TMPL_VAR NAME=MESSAGE></p>
             <h2>Einstellungen</h2>
             <div>
-            		<p>In diesem Bereich bitte die korrekte Anzahl der benötigten Ein- und Ausgänge angeben. Nach dem speichern wird die Kanalkonfiguration angepasst </p>
+            		<p class="hint">In diesem Bereich bitte die korrekte Anzahl der benötigten Ein- und Ausgänge angeben. Nach dem speichern wird die Kanalkonfiguration angepasst </p>
             </div>
             <form method="post" data-ajax="false" name="count_form" id="count_form" action="./index.cgi" class="separatingline">
               <input type="hidden" id="saveCount" name="saveCount" value="saveCount">
@@ -39,7 +39,7 @@
 
             <h2>Kanalkonfiguration</h2>
             <div>
-            		<p>Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen.
+            		<p class="hint">Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen.
             		In das Eingabefeld wird hierfür für jeden Kanal des verwendete GPIO Anschluss eingetragen. Die GPIO Pin Belegung kann <a href="https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm">hier</a> nachgelesen werden.</p>
             </div>
             <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
@@ -62,7 +62,9 @@
               </div>
        			</TMPL_LOOP>
             <h3>Ausgänge</h3>
+            <div class=" ui-field-contain">
 
+            </div>
        			<TMPL_LOOP NAME=number_of_outputs>
        				<div class="<TMPL_VAR NAME=class> ui-field-contain">
        					<label class= "<TMPL_VAR NAME=class>">Ausgang <TMPL_VAR NAME=current>:</label>
@@ -72,7 +74,8 @@
                 </fieldset>
        				</div>
        			</TMPL_LOOP>
-
+            <h3>MQTT</h3>
+              <p class="<TMPL_VAR NAME=mqtthintclass>"><TMPL_VAR NAME=mqtthint></p>
             <center>
               <button class="button" type="reset" form="main_form" id="btnreset2" data-role="button" data-inline="true"
               data-mini="true" data-icon="check">Reset</button>

@@ -42,6 +42,25 @@
   float: left;
   margin: 0em 2% 0 0;
 }
+.mono{
+font-family: monospace;
+font-size: 110%;
+font-weight: bold;
+color: green;
+}
+
+.notityRedMqtt{
+	z-index: 10;
+	left: -44px;
+	top: 0px;
+	background: #ed1d24;
+	color: #fff;
+	padding: 6px;
+	border-radius: 11px;
+	font-size: 12px;
+	line-height: 0.8;
+	min-width: 9px;
+}
 
 .button{
 	width: 300px;

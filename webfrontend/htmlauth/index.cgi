@@ -4,6 +4,7 @@ use LoxBerry::System;
 use LoxBerry::Web;
 use File::HomeDir;
 use LoxBerry::Log;
+use LoxBerry::IO;
 
 use CGI qw/:standard/;
 use warnings;
@@ -109,7 +110,6 @@ if ( param('saveIoConfig') ) {
 		LOGINF "Configuration saved $saved";
 
 		system("$lbpbindir/wrapper.sh restart > /dev/null 2>&1");
-		#my $output = qx ($lbpbindir/wrapper.sh restart);
 		$message = "Eingaben wurden erfolgreich gespeichert";
   		$messagetype = "info";
 	} else{
@@ -205,6 +205,19 @@ sub createInputOutputConfig{
 ##
 #handle Template and render index page
 ##
+# handle MQTT details
+my $mqttsubscription = LoxBerry::System::lbhostname() . "/gpio/#";
+my $mqttcred = LoxBerry::IO::mqtt_connectiondetails();
+my $mqtthint = "Alle Daten werden per MQTT übertragen. Die Subscription dafür lautet <span class='mono'>
+								$mqttsubscription</span> und wird im MQTT Gateway Plugin automatisch eingetragen.";
+my $mqtthintclass = "hint";
+
+if(!$mqttcred){
+	$mqtthint = "MQTT Gateway Plugin wurde nicht gefunden oder ist nicht konfiguriert.
+								Das GPIO Plugin funktioniert nur mit korrekt insatlliertem MQTT Gateway Plugin";
+	$mqtthintclass = "notityRedMqtt";
+}
+
 
 #Set header for our side
 my $version = LoxBerry::System::pluginversion();
@@ -227,6 +240,9 @@ my @inputConfigArray = &createInputOutputConfig($pcfg->{gpio}->{inputs}->{count}
 $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
+$template->param("mqtthint" => $mqtthint);
+$template->param("mqtthintclass" => $mqtthintclass);
+
 
 
 
