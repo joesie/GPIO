@@ -59,7 +59,8 @@ echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
 echo "<INFO> Plugin SBIN folder is: $PSBIN"
 echo "<INFO> Plugin BIN folder is: $PBIN"
 
-
+echo "<INFO> Start MQTT GPIO client"
+su loxberry -c "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh restart"
 
 # Exit with Status 0
 exit 0
