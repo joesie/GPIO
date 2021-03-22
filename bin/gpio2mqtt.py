@@ -157,10 +157,10 @@ def callback_input(channel):
  now = datetime.now()
 
  if GPIO.input(channel): # if SENSOR_PIN of channel == 1 or high
-    send_mqtt_pin_value(i, 1)
+    send_mqtt_pin_value(channel, 1)
     time.sleep(SleepTimeL);
  else: # if SENSOR_PIN of channel != 1 or low
-   send_mqtt_pin_value(i, 0)
+   send_mqtt_pin_value(channel, 0)
    time.sleep(SleepTimeL);
 
 # ============================
