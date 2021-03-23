@@ -11,5 +11,6 @@ export $ENVIRONMENT
 
 su loxberry -c "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start"
 
+echo $HOSTNAME"/gpio/#" > $LBHOMEDIR/config/plugins/${PLUGINNAME}/mqtt_subscriptions.cfg
 
 exit 0
