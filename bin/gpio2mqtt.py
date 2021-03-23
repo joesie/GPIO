@@ -195,6 +195,17 @@ with open(configfile) as json_pcfg_file:
         GPIO.setup(int(channel['pin']), GPIO.OUT)
         GPIO.output(int(channel['pin']), GPIO.HIGH) #Default GPIO High is off
         _LOGGER.debug("set Pin " + channel['pin'] + " as Output")
+# ============================
+##
+#   handle output command
+##
+def handle_setOutput(pin, value):
+    if value == "ON" or value == "1" or value == "on" :
+        GPIO.output(int(pin), GPIO.LOW)
+        send_mqtt_pin_value(pin, 1)
+    if value == "OFF" or value == "0" or value == "off":
+        GPIO.output(int(pin), GPIO.HIGH)
+        send_mqtt_pin_value(pin, 0)
 
 # ============================
 ##
@@ -210,23 +221,27 @@ def on_message(client, userdata, msg):
     now = datetime.now()
     _LOGGER.debug("Topic: " + mytopic + " with Payload: " + mymsg + "!")
 
+    if(mytopic.startswith(MQTT_TOPIC_OUTPUT + "json")):
+        if(not mymsg):
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
+            _LOGGER.error("If you use json to set outputs, you have transmit a json like {'5':'off','6':'on'}. For more information read the manual!")
+            return
+        try:
+            msg_json = json.loads(mymsg)
+            for key in msg_json:
+                handle_setOutput(key, msg_json[key])
+            return
+        except json.decoder.JSONDecodeError as ex:
+            _LOGGER.exception("Malformed json given. Cannot parse string: " + mymsg)
+        except Exception as e:
+            _LOGGER.exception(str(e))
+            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
+
 	# Search for topic in List of available output pins (BCM names) and set gpio to state LOW or HIGH
     for i in range(0, 27):
-      if mytopic == MQTT_TOPIC_OUTPUT + str(i) :
-        if mymsg == "ON" or mymsg == "1" or mymsg == "on" :
+        if mytopic == MQTT_TOPIC_OUTPUT + str(i) :
             try:
-                GPIO.output(i, GPIO.LOW)
-                time.sleep(SleepTimeL)
-                send_mqtt_pin_value(i, 1)
-            except Exception as e:
-                _LOGGER.exception(str(e))
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
-
-        if mymsg == "OFF" or mymsg == "0" or mymsg == "off":
-            try:
-                GPIO.output(i, GPIO.HIGH)
-                time.sleep(SleepTimeL)
-                send_mqtt_pin_value(i, 0)
+                handle_setOutput(i, mymsg)
             except Exception as e:
                 _LOGGER.exception(str(e))
                 client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
