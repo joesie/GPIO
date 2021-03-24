@@ -27,11 +27,25 @@ SleepTimeL = 0.2
 #Configuration MQTT Topics
 hostname = socket.gethostname()
 MQTT_TOPIC_OUTPUT  = hostname + "/gpio/set/"
-MQTT_TOPIC_OUTPUT_RESPONSE  = hostname + "/gpio/"
-MQTT_PATH_STATE_INPUT   = hostname + "/gpio/"
 MQTT_RESPONSE_STATE = hostname + "/gpio/"
 MQTT_DEFAULT_PORT = 1883
 client = mqtt.Client()
+
+
+# ======================
+##
+# Mapping Loglevel from loxberry log to python logging
+##
+
+def map_loglevel(loxlevel):
+    switcher={
+        0:logging.NOTSET,
+        3:logging.ERROR,
+        4:logging.WARNING,
+        6:logging.INFO,
+        7:logging.DEBUG
+    }
+    return switcher.get(int(loxlevel),"unsupported loglevel")
 
 # ======================
 ##
@@ -39,7 +53,7 @@ client = mqtt.Client()
 ##
 inputs = None
 outputs = None
-loglevel="ERROR"
+loglevel=logging.ERROR
 logfile=""
 logfileArg = ""
 lbhomedir = ""
@@ -50,7 +64,7 @@ for opt, arg in opts:
         logfile=arg
         logfileArg = arg
     elif opt in ('-l', '--loglevel'):
-        loglevel=arg
+        loglevel=map_loglevel(arg)
     elif opt in ('-c', '--configfile'):
         configfile=arg
     elif opt in ('-h', '--lbhomedir'):
@@ -70,22 +84,17 @@ def setup_logger(name):
     handler = logging.StreamHandler()
 
     logger.addHandler(handler)
-    logger.setLevel(logging.DEBUG)
+    logger.setLevel(loglevel)
 
-
-    # Logging with standard LoxBerry log format
-    numeric_loglevel = getattr(logging, loglevel.upper(), None)
-    if not isinstance(numeric_loglevel, int):
-        raise ValueError('Invalid log level: %s' % loglevel)
     if not logfile:
         logfile="/tmp/"+datetime.utcnow().strftime('%Y%m%d_%H%M%S_%f')[:-3]+"_gpio2mqtt.log"
-    logging.basicConfig(filename=logfile,level=numeric_loglevel,format='%(asctime)s.%(msecs)03d <%(levelname)s> %(message)s',datefmt='%H:%M:%S')
+    logging.basicConfig(filename=logfile,level=loglevel,format='%(asctime)s.%(msecs)03d <%(levelname)s> %(message)s',datefmt='%H:%M:%S')
 
     return logger
 
 _LOGGER = setup_logger("GPIO2MQTT")
 _LOGGER.debug("logfile: " + logfileArg)
-_LOGGER.debug("loglevel: " + loglevel)
+_LOGGER.info("loglevel: " + logging.getLevelName(_LOGGER.level))
 
 
 # ============================
@@ -147,7 +156,7 @@ def send_mqtt_pin_value(pin, value):
 #
 def mqtt_heatbeat(name):
     while(1):
-        client.publish(MQTT_TOPIC_OUTPUT_RESPONSE+'status', "Online")
+        client.publish(MQTT_RESPONSE_STATE+'status', "Online")
         time.sleep(10)
 
 ##
@@ -169,6 +178,7 @@ def callback_input(channel):
 ##
 GPIO.setmode(GPIO.BCM)
 with open(configfile) as json_pcfg_file:
+    _LOGGER.info("Configure GPIOs")
     pcfg = json.load(json_pcfg_file)
     gpio = pcfg['gpio']
 
@@ -182,9 +192,9 @@ with open(configfile) as json_pcfg_file:
         if channel['wiring'] == 'd':
             wireing = GPIO.PUD_DOWN
 
-        GPIO.setup(int(channel['pin']), GPIO.IN, pull_up_down = wireing) # TODO: catch runtime errors while setting configuration
+        GPIO.setup(int(channel['pin']), GPIO.IN, pull_up_down = wireing)
         GPIO.add_event_detect(int(channel['pin']) , GPIO.BOTH, callback=callback_input)
-        _LOGGER.debug("set Pin " + channel['pin'] + " as Input")
+        _LOGGER.info("set Pin " + channel['pin'] + " as Input")
 
     # configure outputs
     outputs = gpio['outputs']
@@ -194,7 +204,7 @@ with open(configfile) as json_pcfg_file:
 
         GPIO.setup(int(channel['pin']), GPIO.OUT)
         GPIO.output(int(channel['pin']), GPIO.HIGH) #Default GPIO High is off
-        _LOGGER.debug("set Pin " + channel['pin'] + " as Output")
+        _LOGGER.info("set Pin " + channel['pin'] + " as Output")
 # ============================
 ##
 #   handle output command
@@ -223,8 +233,8 @@ def on_message(client, userdata, msg):
 
     if(mytopic.startswith(MQTT_TOPIC_OUTPUT + "json")):
         if(not mymsg):
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
-            _LOGGER.error("If you use json to set outputs, you have transmit a json like {'5':'off','6':'on'}. For more information read the manual!")
+            client.publish(MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
+            _LOGGER.error("If you use json to set outputs, you have to transmit a json like {'5':'off','6':'on'}. For more information read the manual!")
             return
         try:
             msg_json = json.loads(mymsg)
@@ -235,7 +245,7 @@ def on_message(client, userdata, msg):
             _LOGGER.exception("Malformed json given. Cannot parse string: " + mymsg)
         except Exception as e:
             _LOGGER.exception(str(e))
-            client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
+            client.publish(MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
 
 	# Search for topic in List of available output pins (BCM names) and set gpio to state LOW or HIGH
     for i in range(0, 27):
@@ -244,7 +254,7 @@ def on_message(client, userdata, msg):
                 handle_setOutput(i, mymsg)
             except Exception as e:
                 _LOGGER.exception(str(e))
-                client.publish(MQTT_TOPIC_OUTPUT_RESPONSE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
+                client.publish(MQTT_RESPONSE_STATE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
 
 
 #=============================
@@ -276,7 +286,7 @@ try:
     client.on_connect = on_connect
     client.on_message = on_message
     client.username_pw_set(mqttconf['username'], mqttconf['password'])
-    client.will_set(MQTT_TOPIC_OUTPUT_RESPONSE+'status', 'Offline', qos=0, retain=True)
+    client.will_set(MQTT_RESPONSE_STATE+'status', 'Offline', qos=0, retain=True)
     client.connect(mqttconf['address'], mqttconf['port'], 60)
 
     mqtt_heatbeatThread = threading.Thread(target=mqtt_heatbeat, args=(1,))
@@ -287,4 +297,5 @@ try:
 except KeyboardInterrupt:
     _LOGGER.info("Stop MQTT Client")
     GPIO.cleanup()
+    logging.shutdown()
 # ============================
