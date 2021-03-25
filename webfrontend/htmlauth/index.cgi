@@ -179,7 +179,7 @@ sub createInputOutputConfig{
   	}
 
     if($_[1] eq "outputs"){
-  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class};
+  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class,hostname =>lbhostname()};
   	} else {
 			# for inputs need to configure the wiring Dropdown
 			my $wiring=     $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
@@ -196,7 +196,13 @@ sub createInputOutputConfig{
 					-labels  => \%wiringlabels,
 					-default => $confwiring,
 			);
-  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class, SELECTLIST =>$wiringselectlist};
+  		push @result, {current=>$i,
+											value =>$value,
+											errormessage=>$error,
+											class=>$class,
+											SELECTLIST =>$wiringselectlist,
+											hostname =>lbhostname()
+										};
   	}
   }
   return @result;
@@ -242,6 +248,7 @@ $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
 $template->param("mqtthint" => $mqtthint);
 $template->param("mqtthintclass" => $mqtthintclass);
+
 
 
 

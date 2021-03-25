@@ -53,7 +53,30 @@
                 <fieldset>
                   <div class="gpioconf <TMPL_VAR NAME=class>">
                     <input type='text' id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
-       						  <p><TMPL_VAR NAME=errormessage></p>
+       						  <p class="error_hint"><TMPL_VAR NAME=errormessage></p>
+                    <p class="info_text">LoxoneConfig <a href="#popupInfo<TMPL_VAR NAME=current>" data-rel="popup" data-transition="pop" style="background:none" class="info_icon my-tooltip-btn ui-btn ui-alt-icon ui-nodisc-icon ui-btn-inline ui-icon-info ui-btn-icon-notext" title="Show more">Show more</a></p>
+                    <div data-role="popup" id="popupInfo<TMPL_VAR NAME=current>" class="ui-content" data-theme="a" style="max-width:700px;">
+                      <span class="info_text_headline">Konfiguration des Eingangs <TMPL_VAR NAME=current> in der LoxoneConfig</span>
+                      <span class="info_text_subline mono">Name des Eingangs:</span>
+                      <table>
+                        <tr>
+                          <td>Wert:</td>
+                          <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_state</td>
+                        </tr>
+                        <tr>
+                          <td>Wert als Text:</td>
+                          <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_stateText</td>
+                        </tr>
+                        <tr>
+                          <td>Zeitstempel Ein:</td>
+                          <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_timestamp_ON</td>
+                        </tr>
+                        <tr>
+                          <td>Zeitstempel Aus:</td>
+                          <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_timestamp_OFF</td>
+                        </tr>
+                      </table>
+                    </div>
                   </div>
        						<div class="wiring">
          						<TMPL_VAR SELECTLIST>
@@ -70,7 +93,43 @@
        					<label class= "<TMPL_VAR NAME=class>">Ausgang <TMPL_VAR NAME=current>:</label>
                 <fieldset>
                   <input class= "<TMPL_VAR NAME=class>" type='text' id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>"></input>
-       						<p><TMPL_VAR NAME=errormessage></p>
+       						<p class="error_hint"><TMPL_VAR NAME=errormessage></p>
+                  <p class="info_text">LoxoneConfig <a href="#popupInfoOutput<TMPL_VAR NAME=current>" data-rel="popup" data-transition="pop" style="background:none" class="info_icon my-tooltip-btn ui-btn ui-alt-icon ui-nodisc-icon ui-btn-inline ui-icon-info ui-btn-icon-notext" title="Show more">Show more</a></p>
+                  <div data-role="popup" id="popupInfoOutput<TMPL_VAR NAME=current>" class="ui-content" data-theme="a" style="max-width:700px;">
+                    
+                    <span class="info_text_headline">Konfiguration des Ausgangs <TMPL_VAR NAME=current> in der LoxoneConfig</span>
+                    <span class="info_text_subline mono">Virtueller Ausgang Befehl:</span>
+                    <table>
+                      <tr>
+                        <td>Befehl für EIN:</td>
+                        <td class="param">publish <TMPL_VAR NAME=hostname>/gpio/set/<TMPL_VAR value> on</td>
+                      </tr>
+                      <tr>
+                        <td>Befehl für AUS:</td>
+                        <td class="param">publish <TMPL_VAR NAME=hostname>/gpio/set/<TMPL_VAR value> off</td>
+                      </tr>
+                    </table>
+                    <span class="info_text_subline mono">Antworten als Eingänge:</span>
+                    <table>
+                      <tr>
+                        <td>Wert:</td>
+                        <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_state</td>
+                      </tr>
+                      <tr>
+                        <td>Wert als Text:</td>
+                        <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_stateText</td>
+                      </tr>
+                      <tr>
+                        <td>Zeitstempel Ein:</td>
+                        <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_timestamp_ON</td>
+                      </tr>
+                      <tr>
+                        <td>Zeitstempel Aus:</td>
+                        <td class="param"><TMPL_VAR NAME=hostname>_gpio_<TMPL_VAR value>_timestamp_OFF</td>
+                      </tr>
+                    </table>
+
+                  </div>
                 </fieldset>
        				</div>
        			</TMPL_LOOP>

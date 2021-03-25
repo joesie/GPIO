@@ -61,6 +61,33 @@ color: green;
 	line-height: 0.8;
 	min-width: 9px;
 }
+.error_hint{
+	float: left;
+	margin-top: 0px;
+}
+.info_icon{
+	border: none;
+	background: none;
+	margin-top: 5px;
+}
+.info_text{
+	float: right;
+	margin-top: -10px;
+	margin-bottom: 0px;
+}
+
+.ui-content>span.info_text_subline{
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+.info_text_headline{
+	font-weight: bold;
+	display: block;
+}
+
+.param{
+	font-weight: bold;
+}
 
 .button{
 	width: 300px;
