@@ -262,7 +262,9 @@ def on_message(client, userdata, msg):
 #  send the current state of configured inputs and outputs as MQTT message
 ##
 def send_state():
+    _LOGGER.debug("Send pin state ")
     if inputs is not None:
+        _LOGGER.debug("Send pin state for inputs")
         for i in range(0, int(inputs['count'])):
             key = "channel_{}".format(i)
             channel = inputs[key]
@@ -270,6 +272,7 @@ def send_state():
             send_mqtt_pin_value(int(channel['pin']), value)
 
     if outputs is not None:
+        _LOGGER.debug("Send pin state for outputs")
         for i in range(0, int(outputs['count'])):
             key = "channel_{}".format(i)
             channel = outputs[key]
@@ -288,6 +291,7 @@ try:
     client.username_pw_set(mqttconf['username'], mqttconf['password'])
     client.will_set(MQTT_RESPONSE_STATE+'status', 'Offline', qos=0, retain=True)
     client.connect(mqttconf['address'], mqttconf['port'], 60)
+    client.publish(MQTT_RESPONSE_STATE+'status', "Starting ...")
 
     mqtt_heatbeatThread = threading.Thread(target=mqtt_heatbeat, args=(1,))
     mqtt_heatbeatThread.start()
@@ -296,6 +300,7 @@ try:
     client.loop_forever()
 except KeyboardInterrupt:
     _LOGGER.info("Stop MQTT Client")
+    paho.mqtt.client()
     GPIO.cleanup()
     logging.shutdown()
 # ============================
