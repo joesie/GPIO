@@ -140,15 +140,15 @@ if mqttconf is None:
 def send_mqtt_pin_value(pin, value):
     now = datetime.now()
     if(value):
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state" , "1")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText" , "ON")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'))
-        _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': ON'))
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state" , "1", retain = True)
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText" , "ON", retain = True)
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'), retain = True)
+        _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': ON'), retain = True)
     else:
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText", "OFF")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state", "0")
-        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'))
-        _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': OFF'))
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText", "OFF", retain = True)
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state", "0", retain = True)
+        client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'), retain = True)
+        _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': OFF'), retain = True)
 
 # ============================
 ##
@@ -156,7 +156,7 @@ def send_mqtt_pin_value(pin, value):
 #
 def mqtt_heatbeat(name):
     while(1):
-        client.publish(MQTT_RESPONSE_STATE+'status', "Online")
+        client.publish(MQTT_RESPONSE_STATE+'status', "Online", retain = True)
         time.sleep(10)
 
 ##
@@ -233,8 +233,8 @@ def on_message(client, userdata, msg):
 
     if(mytopic.startswith(MQTT_TOPIC_OUTPUT + "json")):
         if(not mymsg):
-            client.publish(MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
-            _LOGGER.error("If you use json to set outputs, you have to transmit a json like {'5':'off','6':'on'}. For more information read the manual!")
+            client.publish(MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
+            _LOGGER.error('If you use json to set outputs, you have to transmit a json like {"5":"off","6":"on"}. For more information read the manual!', retain = True)
             return
         try:
             msg_json = json.loads(mymsg)
@@ -245,7 +245,7 @@ def on_message(client, userdata, msg):
             _LOGGER.exception("Malformed json given. Cannot parse string: " + mymsg)
         except Exception as e:
             _LOGGER.exception(str(e))
-            client.publish(MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
+            client.publish(MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
 
 	# Search for topic in List of available output pins (BCM names) and set gpio to state LOW or HIGH
     for i in range(0, 27):
@@ -254,7 +254,7 @@ def on_message(client, userdata, msg):
                 handle_setOutput(i, mymsg)
             except Exception as e:
                 _LOGGER.exception(str(e))
-                client.publish(MQTT_RESPONSE_STATE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!")
+                client.publish(MQTT_RESPONSE_STATE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
 
 
 #=============================
@@ -291,13 +291,12 @@ try:
     client.username_pw_set(mqttconf['username'], mqttconf['password'])
     client.will_set(MQTT_RESPONSE_STATE+'status', 'Offline', qos=0, retain=True)
     client.connect(mqttconf['address'], mqttconf['port'], 60)
-    client.publish(MQTT_RESPONSE_STATE+'status', "Starting ...")
 
     mqtt_heatbeatThread = threading.Thread(target=mqtt_heatbeat, args=(1,))
     mqtt_heatbeatThread.start()
     send_state()
-
     client.loop_forever()
+
 except KeyboardInterrupt:
     _LOGGER.info("Stop MQTT Client")
     paho.mqtt.client()
