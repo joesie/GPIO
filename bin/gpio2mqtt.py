@@ -143,12 +143,12 @@ def send_mqtt_pin_value(pin, value):
         client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state" , "1", retain = True)
         client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText" , "ON", retain = True)
         client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_ON", now.strftime('%Y-%m-%d %H:%M:%S'), retain = True)
-        _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': ON'), retain = True)
+        _LOGGER.debug(now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': ON'))
     else:
         client.publish(MQTT_RESPONSE_STATE + str(pin) + "/stateText", "OFF", retain = True)
         client.publish(MQTT_RESPONSE_STATE + str(pin) + "/state", "0", retain = True)
         client.publish(MQTT_RESPONSE_STATE + str(pin) + "/timestamp_OFF", now.strftime('%Y-%m-%d %H:%M:%S'), retain = True)
-        _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': OFF'), retain = True)
+        _LOGGER.debug( now.strftime('%Y-%m-%d %H:%M:%S') + " : " + (MQTT_RESPONSE_STATE + str(pin) + ': OFF'))
 
 # ============================
 ##
@@ -234,7 +234,7 @@ def on_message(client, userdata, msg):
     if(mytopic.startswith(MQTT_TOPIC_OUTPUT + "json")):
         if(not mymsg):
             client.publish(MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
-            _LOGGER.error('If you use json to set outputs, you have to transmit a json like {"5":"off","6":"on"}. For more information read the manual!', retain = True)
+            _LOGGER.error('If you use json to set outputs, you have to transmit a json like {"5":"off","6":"on"}. For more information read the manual!')
             return
         try:
             msg_json = json.loads(mymsg)
