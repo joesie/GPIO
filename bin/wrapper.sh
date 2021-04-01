@@ -28,6 +28,8 @@ LOGSTART "gpio2mqtt"
 case "$1" in
   start|restart)
 
+	echo $HOSTNAME"/gpio/#" > $LBHOMEDIR/config/plugins/${PLUGINNAME}/mqtt_subscriptions.cfg
+	
 	if [ "$1" = "restart" ]; then
 		LOGINF "Stopping gpio2mqtt..."
 		pkill -f "$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py" >> ${FILENAME} 2>&1
