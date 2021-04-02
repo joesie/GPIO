@@ -120,7 +120,7 @@ try:
         mqttaddressArray = mqttPluginconfig['Main']['brokeraddress'].split(":")
         mqttPort = MQTT_DEFAULT_PORT
         if len(mqttaddressArray) > 1:
-            mqttPort = mqttaddressArray[1]
+            mqttPort = int(mqttaddressArray[1])
 
         mqttconf = {
             'username':mqttuser,
@@ -264,7 +264,6 @@ def on_message(client, userdata, msg):
                 _LOGGER.exception(str(e))
                 client.publish(MQTT_RESPONSE_STATE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
 
-
 #=============================
 ##
 #  send the current state of configured inputs and outputs as MQTT message
@@ -306,9 +305,16 @@ try:
     client.loop_forever()
 except Exception as e:
     _LOGGER.exception(str(e))
-except KeyboardInterrupt:
+# except KeyboardInterrupt:
+#     _LOGGER.info("Stop MQTT Client")
+#     client.disconnect() # disconnect gracefully
+#     client.loop_stop() # stops network loop
+#     GPIO.cleanup()
+#     logging.shutdown()
+finally:
     _LOGGER.info("Stop MQTT Client")
-
+    client.disconnect() # disconnect gracefully
+    client.loop_stop() # stops network loop
     GPIO.cleanup()
     logging.shutdown()
 # ============================
