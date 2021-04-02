@@ -120,7 +120,7 @@ try:
         mqttaddressArray = mqttPluginconfig['Main']['brokeraddress'].split(":")
         mqttPort = MQTT_DEFAULT_PORT
         if len(mqttaddressArray) > 1:
-            mqttPort = x[1]
+            mqttPort = mqttaddressArray[1]
 
         mqttconf = {
             'username':mqttuser,
