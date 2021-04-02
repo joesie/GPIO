@@ -102,31 +102,35 @@ _LOGGER.info("loglevel: " + logging.getLevelName(_LOGGER.level))
 # get configuration from mqtt broker and store config in mqttconf variable
 ##
 mqttconf = None;
-with open(lbhomedir + '/data/system/plugindatabase.json') as json_plugindatabase_file:
-    plugindatabase = json.load(json_plugindatabase_file)
-    mqttconfigdir = plugindatabase['plugins']['07a6053111afa90479675dbcd29d54b5']['directories']['lbpconfigdir']
+try:
+    with open(lbhomedir + '/data/system/plugindatabase.json') as json_plugindatabase_file:
+        plugindatabase = json.load(json_plugindatabase_file)
+        mqttconfigdir = plugindatabase['plugins']['07a6053111afa90479675dbcd29d54b5']['directories']['lbpconfigdir']
 
-    mqttPluginconfig = None
-    with open(mqttconfigdir + '/mqtt.json') as json_mqttconfig_file:
-        mqttPluginconfig = json.load(json_mqttconfig_file)
+        mqttPluginconfig = None
+        with open(mqttconfigdir + '/mqtt.json') as json_mqttconfig_file:
+            mqttPluginconfig = json.load(json_mqttconfig_file)
 
-    mqttcred = None
-    with open(mqttconfigdir + '/cred.json') as json_mqttcred_file:
-        mqttcred = json.load(json_mqttcred_file)
+        mqttcred = None
+        with open(mqttconfigdir + '/cred.json') as json_mqttcred_file:
+            mqttcred = json.load(json_mqttcred_file)
 
-    mqttuser = mqttcred['Credentials']['brokeruser']
-    mqttpass = mqttcred['Credentials']['brokerpass']
-    mqttaddressArray = mqttPluginconfig['Main']['brokeraddress'].split(":")
-    mqttPort = MQTT_DEFAULT_PORT
-    if len(mqttaddressArray) > 1:
-        mqttPort = x[1]
+        mqttuser = mqttcred['Credentials']['brokeruser']
+        mqttpass = mqttcred['Credentials']['brokerpass']
+        mqttaddressArray = mqttPluginconfig['Main']['brokeraddress'].split(":")
+        mqttPort = MQTT_DEFAULT_PORT
+        if len(mqttaddressArray) > 1:
+            mqttPort = x[1]
 
-    mqttconf = {
-        'username':mqttuser,
-        'password':mqttpass,
-        'address': mqttaddressArray[0],
-        'port': mqttPort
-    }
+        mqttconf = {
+            'username':mqttuser,
+            'password':mqttpass,
+            'address': mqttaddressArray[0],
+            'port': mqttPort
+        }
+    _LOGGER.debug("MQTT config" + str(mqttconf))
+except Exception as e:
+    _LOGGER.exception(str(e))
 
 # If no mqtt config found leave the script with log entry
 if mqttconf is None:
@@ -176,35 +180,39 @@ def callback_input(channel):
 ##
 # setup GPIOS
 ##
-GPIO.setmode(GPIO.BCM)
-with open(configfile) as json_pcfg_file:
-    _LOGGER.info("Configure GPIOs")
-    pcfg = json.load(json_pcfg_file)
-    gpio = pcfg['gpio']
+_LOGGER.info("Configure GPIOs")
+try:
+    GPIO.setmode(GPIO.BCM)
+    with open(configfile) as json_pcfg_file:
+        pcfg = json.load(json_pcfg_file)
+        _LOGGER.debug("Plugin Config: " + str(pcfg))
+        gpio = pcfg['gpio']
 
-    # configure inputs
-    inputs = gpio['inputs']
-    for i in range(0, int(inputs['count'])):
-        key = "channel_{}".format(i)
-        channel = inputs[key]
+        # configure inputs
+        inputs = gpio['inputs']
+        for i in range(0, int(inputs['count'])):
+            key = "channel_{}".format(i)
+            channel = inputs[key]
 
-        wireing = GPIO.PUD_UP
-        if channel['wiring'] == 'd':
-            wireing = GPIO.PUD_DOWN
+            wireing = GPIO.PUD_UP
+            if channel['wiring'] == 'd':
+                wireing = GPIO.PUD_DOWN
 
-        GPIO.setup(int(channel['pin']), GPIO.IN, pull_up_down = wireing)
-        GPIO.add_event_detect(int(channel['pin']) , GPIO.BOTH, callback=callback_input)
-        _LOGGER.info("set Pin " + channel['pin'] + " as Input")
+            GPIO.setup(int(channel['pin']), GPIO.IN, pull_up_down = wireing)
+            GPIO.add_event_detect(int(channel['pin']) , GPIO.BOTH, callback=callback_input)
+            _LOGGER.info("set Pin " + channel['pin'] + " as Input")
 
-    # configure outputs
-    outputs = gpio['outputs']
-    for i in range(0, int(outputs['count'])):
-        key = "channel_{}".format(i)
-        channel = outputs[key]
+        # configure outputs
+        outputs = gpio['outputs']
+        for i in range(0, int(outputs['count'])):
+            key = "channel_{}".format(i)
+            channel = outputs[key]
 
-        GPIO.setup(int(channel['pin']), GPIO.OUT)
-        GPIO.output(int(channel['pin']), GPIO.HIGH) #Default GPIO High is off
-        _LOGGER.info("set Pin " + channel['pin'] + " as Output")
+            GPIO.setup(int(channel['pin']), GPIO.OUT)
+            GPIO.output(int(channel['pin']), GPIO.HIGH) #Default GPIO High is off
+            _LOGGER.info("set Pin " + channel['pin'] + " as Output")
+except Exception as e:
+    _LOGGER.exception(str(e))
 # ============================
 ##
 #   handle output command
@@ -296,10 +304,11 @@ try:
     mqtt_heatbeatThread.start()
     send_state()
     client.loop_forever()
-
+except Exception as e:
+    _LOGGER.exception(str(e))
 except KeyboardInterrupt:
     _LOGGER.info("Stop MQTT Client")
-    paho.mqtt.client()
+
     GPIO.cleanup()
     logging.shutdown()
 # ============================
