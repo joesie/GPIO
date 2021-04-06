@@ -32,6 +32,7 @@ else
 		$LBHOMEDIR/bin/plugins/${PLUGINNAME}/wrapper.sh start
 		LOGEND "cron"
 		exit 0
+	fi
 fi
 
 exit 0
