@@ -104,6 +104,13 @@ if ( param('saveIoConfig') ) {
 
   $pcfg->{main}->{miniserver} = param('selMiniServer');
 
+# handle mqtt settings
+	$pcfg->{mqtt}->{mqttusemqttgateway} = param('mqttusemqttgateway');
+	$pcfg->{mqtt}->{mqttbrokerserver} = param('mqttbrokerserver');
+	$pcfg->{mqtt}->{mqttbrokerport} = int(param('mqttbrokerport'));
+	$pcfg->{mqtt}->{mqttbrokerusername} = param('mqttbrokerusername');
+	$pcfg->{mqtt}->{mqttbrokerpassword} = param('mqttbrokerpassword');
+
 	if($messagetype ne("error")){
 
 		my $saved = $jsonobj->write();
@@ -171,7 +178,7 @@ sub createInputOutputConfig{
 
   for($i=0;$i<$_[0];$i++){
 
-		my $value = $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{pin};
+	my $value = $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{pin};
   	my $error = $errormessages{"$_[1].pin$i"};
   	my $class = "info";;
   	if($error ne ""){
@@ -211,19 +218,6 @@ sub createInputOutputConfig{
 ##
 #handle Template and render index page
 ##
-# handle MQTT details
-my $mqttsubscription = LoxBerry::System::lbhostname() . "/gpio/#";
-my $mqttcred = LoxBerry::IO::mqtt_connectiondetails();
-my $mqtthint = "Alle Daten werden per MQTT übertragen. Die Subscription dafür lautet <span class='mono'>
-								$mqttsubscription</span> und wird im MQTT Gateway Plugin automatisch eingetragen.";
-my $mqtthintclass = "hint";
-
-if(!$mqttcred){
-	$mqtthint = "MQTT Gateway Plugin wurde nicht gefunden oder ist nicht konfiguriert.
-								Das GPIO Plugin funktioniert nur mit korrekt insatlliertem MQTT Gateway Plugin";
-	$mqtthintclass = "notityRedMqtt";
-}
-
 
 #Set header for our side
 my $version = LoxBerry::System::pluginversion();
@@ -246,11 +240,23 @@ my @inputConfigArray = &createInputOutputConfig($pcfg->{gpio}->{inputs}->{count}
 $template->param("number_of_inputs" => \@inputConfigArray);
 $template->param("MESSAGE" =>$message);
 $template->param("MESSAGETYPE" => $messagetype);
-$template->param("mqtthint" => $mqtthint);
-$template->param("mqtthintclass" => $mqtthintclass);
-
-
-
+#
+# handle MQTT details
+my $mqttsubscription = LoxBerry::System::lbhostname() . "/gpio/#";
+my $mqttcred = LoxBerry::IO::mqtt_connectiondetails();
+if ($mqttcred) {
+	$template->param("MQTTGATEWAY_INSTALLED" => "1");
+} else {
+	$template->param("MQTTGATEWAY_INSTALLED" => "0");
+}
+if ($pcfg->{mqtt}->{mqttusemqttgateway}) {
+		$template->param("MQTTUSEMQTTGATEWAYCHECKED" => "checked=checked");
+}
+$template->param("MQTTBROKERSERVER" => $pcfg->{mqtt}->{mqttbrokerserver});
+$template->param("MQTTBROKERPORT" => $pcfg->{mqtt}->{mqttbrokerport});
+$template->param("MQTTBROKERUSERNAME" => $pcfg->{mqtt}->{mqttbrokerusername});
+$template->param("MQTTBROKERPASSWORD" => $pcfg->{mqtt}->{mqttbrokerpassword});
+$template->param("MQTTSUBSCRIPTION" => "$mqttsubscription");
 
 
 # Write template
