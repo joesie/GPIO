@@ -9,13 +9,5 @@
    },
    "main" : {
       "miniserver" : "1"
-   },
-   "mqtt" : {
-      "mqttbrokerpassword" : "",
-      "mqttbrokerport" : 1883,
-      "mqttbrokerserver" : "localhost",
-      "mqttbrokerusername" : "",
-      "mqttusemqttgateway" : "on"
    }
-}
 }

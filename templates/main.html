@@ -4,7 +4,7 @@
     			<p class= "<TMPL_VAR NAME=MESSAGETYPE> maininfo"><TMPL_VAR NAME=MESSAGE></p>
             <h2>Einstellungen</h2>
             <div>
-            		<p class="hint">In diesem Bereich bitte die korrekte Anzahl der benötigten Ein- und Ausgänge angeben. Nach dem Speichern wird die Kanalkonfiguration angepasst </p>
+            		<p class="hint">In diesem Bereich bitte die korrekte Anzahl der benötigten Ein- und Ausgänge angeben. Nach dem speichern wird die Kanalkonfiguration angepasst </p>
             </div>
             <form method="post" data-ajax="false" name="count_form" id="count_form" action="./index.cgi" class="separatingline">
               <input type="hidden" id="saveCount" name="saveCount" value="saveCount">
@@ -40,7 +40,7 @@
             <h2>Kanalkonfiguration</h2>
             <div>
             		<p class="hint">Hier werden die Zuordnungen der physikalischen Anschlüsse des Raspberrys zu den Kanälen der Ein- und Ausgänge vorgenommen.
-            		In das Eingabefeld wird hierfür für jeden Kanal der verwendete GPIO Anschluss eingetragen. Die GPIO Pin Belegung kann hier nachgelesen werden: <a href="https://www.raspberrypi.org/documentation/usage/gpio/">https://www.raspberrypi.org/documentation/usage/gpio/</a></p>
+            		In das Eingabefeld wird hierfür für jeden Kanal des verwendete GPIO Anschluss eingetragen. Die GPIO Pin Belegung kann <a href="https://www.elektronik-kompendium.de/sites/raspberry-pi/1907101.htm">hier</a> nachgelesen werden.</p>
             </div>
             <form method="post" data-ajax="false" name="main_form" id="main_form" action="./index.cgi">
         		<input type="hidden" id="saveIoConfig" name="saveIoConfig" value="saveIoConfig">
@@ -78,12 +78,12 @@
                       </table>
                     </div>
                   </div>
-       		<div class="wiring">
-         		<TMPL_VAR SELECTLIST>
-       		</div>
+       						<div class="wiring">
+         						<TMPL_VAR SELECTLIST>
+       						</div>
                 </fieldset>
               </div>
-       	</TMPL_LOOP>
+       			</TMPL_LOOP>
             <h3>Ausgänge</h3>
             <div class=" ui-field-contain">
 
@@ -133,56 +133,8 @@
                 </fieldset>
        				</div>
        			</TMPL_LOOP>
-
             <h3>MQTT</h3>
-            <div>
-		    <p class="hint">Das Plugin sendet den Status der GPIOs an einen MQTT Broker. Von dort aus kann die Auswertung über die LoxoneConfig erfolgen. Wenn das MQTT Gateway Plugin auf diesem LoxBerry installiert ist, kannst Du die Zugangsdaten automatisch von dort übernehmen lassen. Ansonsten musst Du die Verbindungsdaten zu Deinem MQTT Broker manuell angeben.</p>
-            </div>
-
-	<TMPL_IF MQTTGATEWAY_INSTALLED>
-			<div class="ui-field-contain">
-			<label	class="info"></label>
-				<div	class="gpioconf info">
-					<label	class=	"control-label" for="mqttusemqttgateway">Verwende MQTT Gateway Einstelllungen</label>
-					<input type="checkbox" name="mqttusemqttgateway" id="mqttusemqttgateway" <TMPL_VAR NAME=MQTTUSEMQTTGATEWAYCHECKED>>	
-					<span id="mqtt_onverviewlink"></span>
-				</div>
-			</div>
-		
-	</TMPL_IF>
-	
-	<div class="ui-field-contain ui-state-disabled ownbroker">
-			<label	class="info">MQTT Broker Server</label>
-		<div	class="gpioconf info">
-			<input width="100%" id="mqttbrokerserver" name="mqttbrokerserver" type="text" class="textfield" value="<TMPL_VAR MQTTBROKERSERVER>">
-		</div>
-	</div>
-	<div class="ui-field-contain ui-state-disabled ownbroker">
-			<label	class="info">MQTT Broker Port</label>
-		<div	class="gpioconf info">
-			<input width="100%" id="mqttbrokerport" name="mqttbrokerport" type="text" class="textfield" value="<TMPL_VAR MQTTBROKERPORT>">
-		</div>
-	</div>
-	<div class="ui-field-contain ui-state-disabled ownbroker">
-			<label	class="info">MQTT Broker Username</label>
-		<div	class="gpioconf info">
-			<input width="100%" id="mqttbrokerusername" name="mqttbrokerusername" type="text" class="textfield" value="<TMPL_VAR MQTTBROKERUSERNAME>">
-		</div>
-	</div>
-	<div class="ui-field-contain ui-state-disabled ownbroker">
-			<label	class="info">MQTT Broker Password</label>
-		<div	class="gpioconf info">
-			<input width="100%" id="mqttbrokerpassword" name="mqttbrokerpassword" type="text" class="textfield" value="<TMPL_VAR MQTTBROKERPASSWORD>">
-		</div>
-	</div>
-	<div class="ui-field-contain ui-state-disabled ownbroker">
-			<label	class="info">MQTT Subscription</label>
-		<div	class="gpioconf info">
-			<input width="100%" id="mqttsubscription" name="mqttsubscription" type="text" class="textfield" value="<TMPL_VAR MQTTSUBSCRIPTION>" readonly>
-		</div>
-	</div>
-		
-
+              <p class="<TMPL_VAR NAME=mqtthintclass>"><TMPL_VAR NAME=mqtthint></p>
             <center>
               <button class="button" type="reset" form="main_form" id="btnreset2" data-role="button" data-inline="true"
               data-mini="true" data-icon="check">Reset</button>
@@ -193,24 +145,3 @@
       </div>
     </div>
 </div>
-
-<script>
-$(function() {
-
-	$("#mqtt_onverviewlink").html('<a href="http://'+window.location.host+'/admin/plugins/mqttgateway/index.cgi?form=topics" target="_blank">Öffne MQTT Gateway Incoming Übersicht</a>');
-	refreshMQTTForm();
-
-});
-
-function refreshMQTTForm() {
-	console.log("refreshmqttform");
-	$(".MQTT").removeClass("ui-state-disabled");
-	if( $("#mqttusemqttgateway").is(":checked") )
-		$(".ownbroker").addClass("ui-state-disabled");
-	else
-		$(".ownbroker").removeClass("ui-state-disabled");
-}
-
-$("#mqttusemqttgateway").on("click", refreshMQTTForm);
-
-</script>
