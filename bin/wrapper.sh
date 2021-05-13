@@ -45,8 +45,8 @@ case "$1" in
 	$LBHOMEDIR/bin/plugins/${PLUGINNAME}/gpio2mqtt.py --logfile ${FILENAME} --loglevel ${LOGLEVEL} --configfile $LBHOMEDIR/config/plugins/${PLUGINNAME}/pluginconfig.json --lbhomedir $LBHOMEDIR > /dev/null 2>&1 &
 
 	LOGEND "gpio2mqtt"
-        exit 0
-        ;;
+    exit 0
+    ;;
 
   stop)
 
@@ -64,7 +64,7 @@ case "$1" in
         ;;
 
   *)
-        echo "Usage: $0 [start|stop|restart]" >&2
+    echo "Usage: $0 [start|stop|restart]" >&2
 	LOGINF "No command given. Exiting."
 	LOGEND "gpio2mqtt"
         exit 0

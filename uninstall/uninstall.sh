@@ -3,7 +3,7 @@
 # Bashscript which is executed by bash when uninstalling the plugin
 # Use with caution and remember, that all systems may be different!
 #
-# Exit code must be 0 if executed successfull. 
+# Exit code must be 0 if executed successfull.
 # Exit code 1 gives a warning but continues deinstallation.
 #
 # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -57,5 +57,8 @@ echo "<INFO> Plugin CONFIG folder is: $PCONFIG"
 echo "<INFO> Plugin SBIN folder is: $PSBIN"
 echo "<INFO> Plugin BIN folder is: $PBIN"
 
+
+echo "Stop daemon"
+su loxberry -c "$PBIN/wrapper.sh stop"
 # Exit with Status 0
 exit 0
