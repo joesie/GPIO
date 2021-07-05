@@ -96,8 +96,10 @@ class MqttClient():
                 return
             try:
                 msg_json = json.loads(mymsg)
+                self._LOGGER.debug("msg_json: " + str(msg_json))
                 for key in msg_json:
                     OutputChannel.handle_setOutput(key, msg_json[key])
+                    self._LOGGER.debug("key: " + key + " msg_jsonkey] "+ str(msg_json[key]))
                 return
             except json.decoder.JSONDecodeError as ex:
                 self._LOGGER.exception("Malformed json given. Cannot parse string: " + mymsg)
@@ -106,13 +108,17 @@ class MqttClient():
                 self.client.publish(MqttClient.MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
 
         # Search for topic in List of available output pins (BCM names) and set gpio to state LOW or HIGH
-        for i in range(0, 27):
-            if mytopic == MqttClient.MQTT_TOPIC_OUTPUT + str(i) :
+        switched = False
+        for channel in Channel.outputChannels:
+            if mytopic == MqttClient.MQTT_TOPIC_OUTPUT + str(channel.pin) :
                 try:
-                    OutputChannel.handle_setOutput(i, mymsg)
+                    OutputChannel.setOutput(channel, mymsg)
+                    switched = True
                 except Exception as e:
                     self._LOGGER.exception(str(e))
-                    self.client.publish(MqttClient.MQTT_RESPONSE_STATE + str(i) + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
+                    self.client.publish(MqttClient.MQTT_RESPONSE_STATE + str(channel.pin) + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
+        if switched == False:
+            self.client.publish(MqttClient.MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, unknown Topic: " + mytopic, retain = True)
 
     def loop_forever(self):
             self.client.loop_forever()
@@ -142,7 +148,6 @@ class MqttClient():
         mqtt_heatbeatThread = threading.Thread(target=self.mqtt_heatbeat, args=(1,))
         mqtt_heatbeatThread.start()
 
-        Channel.sendChannelStates()
 
 
         

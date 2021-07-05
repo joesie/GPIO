@@ -92,7 +92,6 @@ client = MqttClient(lbhomedir + '/data/system/plugindatabase.json', _LOGGER)
 # setup GPIOS
 ##
 Channel.init(configfile, _LOGGER, client)
-
 Channel.sendChannelStates()
 # ============================
 ##

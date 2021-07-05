@@ -120,20 +120,26 @@ class OutputChannel(Channel):
         Channel.__init__(self, _LOGGER, client, int(channel['pin']))
 
         GPIO.setup(int(channel['pin']), GPIO.OUT)
-        GPIO.output(int(channel['pin']), GPIO.HIGH) #Default GPIO High is off
+        GPIO.output(int(channel['pin']), GPIO.LOW) #Default GPIO High is off
         _LOGGER.info("set Pin " + channel['pin'] + " as Output")
 
     ##
     #   handle output command
     ##
+
+    @staticmethod
+    def setOutput(channel, value):
+        if value == "ON" or value == "1" or value == "on" :
+            GPIO.output(int(channel.pin), GPIO.HIGH)
+            channel.send_mqtt_pin_value(1)
+        if value == "OFF" or value == "0" or value == "off":
+            GPIO.output(int(channel.pin), GPIO.LOW)
+            channel.send_mqtt_pin_value(0)
+
+
     @staticmethod   
     def handle_setOutput(pin, value):
         for channel in Channel.outputChannels:
-            if(channel.pin == pin):
-                if value == "ON" or value == "1" or value == "on" :
-                    GPIO.output(int(pin), GPIO.LOW)
-                    channel.send_mqtt_pin_value(1)
-                if value == "OFF" or value == "0" or value == "off":
-                    GPIO.output(int(pin), GPIO.HIGH)
-                    channel.send_mqtt_pin_value(0)
+            if(str(channel.pin) == str(pin)):
+                OutputChannel.setOutput(channel, value)
                     
