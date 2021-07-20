@@ -12,6 +12,7 @@ use strict;
 
 use IPC::System::Simple qw(system capture);
 use LoxBerry::JSON;
+use Error ':try';
 
 my $message;
 my $messagetype;
@@ -93,8 +94,11 @@ if ( param('saveIoConfig') ) {
 # handle output settings
 	for( $currentOutputCount=0; $currentOutputCount< $pcfg->{gpio}->{outputs}->{count}; $currentOutputCount++){
 		my $outputValue = param("output$currentOutputCount");
+		my $isInverted = param("OUTPUTS.INVERT$currentOutputCount");
 
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{pin} = "$outputValue";
+		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{invert} = "$isInverted";
+
 		my $result = &validateGpioUserData($outputValue);
 		if($result ne("ok")){
 			$messagetype = "error";
@@ -136,30 +140,7 @@ sub createSelectArray{
   return @result;
 }
 
-# ---------------------------------------------------
-# Control for "samplingrate" Dropdown
-# ---------------------------------------------------
-sub samplingRates{
-  my @result;
-  my @values  = (0.05,0.1,0.25,0.5);
-	my $default = $pcfg->{main}->{samplingrate};
-	my $selected = "";
 
-	foreach my $value (@values) {
-   		$selected = "";
-   		if($value == $default){
-   			$selected = 'selected';
-   		}
-   		my $label = $value * 1000;
-   		push @result, {VALUE=>$value, LABEL=>"$label ms" ,CHOOSED=>$selected};
-	}
-	if(1 == $default){
-   		$selected = 'selected';
-    }
-  	push @result, {VALUE=>1, LABEL=>"1s" ,CHOOSED=>$selected};
-
-  	return @result;
-}
 
 ##
 # Parameter for I/O config
@@ -179,7 +160,28 @@ sub createInputOutputConfig{
   	}
 
     if($_[1] eq "outputs"){
-  		push @result, {current=>$i,value =>$value, errormessage=>$error, class=>$class,hostname =>lbhostname()};
+		# build invert dropdown for outputs
+		my $conf_invert= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{invert};
+		my @invert = ('false', 'true' );
+		my %invertlabels = (
+			'true' => 'invertiert',
+			'false' => 'nicht invertiert',
+		);
+
+		my $invertselectlist = $cgi->popup_menu(
+					-id	=> 'OUTPUTS.INVERT' . $i,
+					-name    => 'OUTPUTS.INVERT' . $i,
+					-values  => \@invert,
+					-labels  => \%invertlabels,
+					-default => $conf_invert,
+			);
+
+  		push @result, {current=>$i,
+		  				value =>$value, 
+						errormessage=>$error, 
+						class=>$class,
+						hostname =>lbhostname(),
+						INVERTLIST =>$invertselectlist};
   	} else {
 			# for inputs need to configure the wiring Dropdown
 			my $wiring=     $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
@@ -212,11 +214,21 @@ sub createInputOutputConfig{
 #handle Template and render index page
 ##
 # handle MQTT details
+my $mqttcred;
+
 my $mqttsubscription = LoxBerry::System::lbhostname() . "/gpio/#";
-my $mqttcred = LoxBerry::IO::mqtt_connectiondetails();
 my $mqtthint = "Alle Daten werden per MQTT übertragen. Die Subscription dafür lautet <span class='mono'>
 								$mqttsubscription</span> und wird im MQTT Gateway Plugin automatisch eingetragen.";
 my $mqtthintclass = "hint";
+
+# the try catch block is needed because the called function ends in an error in case of not installed 
+# mqtt plugin. This is a bug in called function .. :) 
+try {
+	$mqttcred = LoxBerry::IO::mqtt_connectiondetails();	
+} catch Error::Simple with {
+     #
+};
+
 
 if(!$mqttcred){
 	$mqtthint = "MQTT Gateway Plugin wurde nicht gefunden oder ist nicht konfiguriert.

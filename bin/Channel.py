@@ -105,7 +105,6 @@ class InputChannel(Channel):
     def __init__(self, channel, _LOGGER, client):
         Channel.__init__(self, _LOGGER, client, int(channel['pin']))
 
-
         wireing = GPIO.PUD_UP
         if channel['wiring'] == 'd':
             wireing = GPIO.PUD_DOWN
@@ -115,25 +114,35 @@ class InputChannel(Channel):
         _LOGGER.info("set Pin " + channel['pin'] + " as Input")    
 
 class OutputChannel(Channel):
+    isInverted = False
 
     def __init__(self, channel, _LOGGER, client):
         Channel.__init__(self, _LOGGER, client, int(channel['pin']))
 
+        self.isInverted = False
+        if channel['invert'] == 'true':
+            self.isInverted = True
+
         GPIO.setup(int(channel['pin']), GPIO.OUT)
-        GPIO.output(int(channel['pin']), GPIO.LOW) #Default GPIO High is off
+        GPIO.output(int(channel['pin']), self.isInverted) 
         _LOGGER.info("set Pin " + channel['pin'] + " as Output")
 
     ##
     #   handle output command
     ##
-
-    @staticmethod
-    def setOutput(channel, value):
+    def setOutput(self, channel, value):
         if value == "ON" or value == "1" or value == "on" :
-            GPIO.output(int(channel.pin), GPIO.HIGH)
+            if(self.isInverted == True):
+                GPIO.output(int(channel.pin), GPIO.LOW)
+            else:       
+                GPIO.output(int(channel.pin), GPIO.HIGH)
             channel.send_mqtt_pin_value(1)
         if value == "OFF" or value == "0" or value == "off":
-            GPIO.output(int(channel.pin), GPIO.LOW)
+            if(self.isInverted == True):
+                GPIO.output(int(channel.pin), GPIO.HIGH)
+            else:       
+                GPIO.output(int(channel.pin), GPIO.LOW)
+
             channel.send_mqtt_pin_value(0)
 
 
@@ -141,5 +150,5 @@ class OutputChannel(Channel):
     def handle_setOutput(pin, value):
         for channel in Channel.outputChannels:
             if(str(channel.pin) == str(pin)):
-                OutputChannel.setOutput(channel, value)
+                channel.setOutput(channel, value)
                     
