@@ -38,7 +38,6 @@
 }
 
 .gpioconf{
-	width: 50%;
   float: left;
   margin: 0em 2% 0 0;
 }
@@ -74,6 +73,7 @@ color: green;
 	float: right;
 	margin-top: -10px;
 	margin-bottom: 0px;
+	height: 20px;
 }
 
 .ui-content>span.info_text_subline{
@@ -85,6 +85,12 @@ color: green;
 	display: block;
 }
 
+fieldset.gpio-right{
+	top: 55%;
+	transform: translateY(-45%);
+	position: -webkit-sticky;
+}
+
 .param{
 	font-weight: bold;
 }
@@ -92,3 +98,6 @@ color: green;
 .button{
 	width: 300px;
 }
+
+
+

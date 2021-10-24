@@ -95,9 +95,16 @@ if ( param('saveIoConfig') ) {
 	for( $currentOutputCount=0; $currentOutputCount< $pcfg->{gpio}->{outputs}->{count}; $currentOutputCount++){
 		my $outputValue = param("output$currentOutputCount");
 		my $isInverted = param("OUTPUTS.INVERT$currentOutputCount");
+		my $outputtype = param("OUTPUTS.TYPE$currentOutputCount");
+
+		# if value is empty, user hasn't check the button. We set the value false in config file
+		if($isInverted eq ''){
+			$isInverted = 'false';
+		}
 
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{pin} = "$outputValue";
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{invert} = "$isInverted";
+		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{type} = "$outputtype";
 
 		my $result = &validateGpioUserData($outputValue);
 		if($result ne("ok")){
@@ -162,49 +169,53 @@ sub createInputOutputConfig{
     if($_[1] eq "outputs"){
 		# build invert dropdown for outputs
 		my $conf_invert= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{invert};
-		my @invert = ('false', 'true' );
-		my %invertlabels = (
-			'true' => 'invertiert',
-			'false' => 'nicht invertiert',
-		);
+		my $conf_type= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{type};
 
-		my $invertselectlist = $cgi->popup_menu(
-					-id	=> 'OUTPUTS.INVERT' . $i,
-					-name    => 'OUTPUTS.INVERT' . $i,
-					-values  => \@invert,
-					-labels  => \%invertlabels,
-					-default => $conf_invert,
-			);
+		my $type_digital_value = '';
+		my $type_pwm_value = '';
+		if ($conf_type eq "pwm"){
+			$type_pwm_value = "checked=checked";
+		} else {
+			$type_digital_value = "checked=checked";
+		}
+
+		my $invertCheck_value = '';
+
+		if($conf_invert eq 'true'){
+			$invertCheck_value = "checked=checked";
+		} 
+
 
   		push @result, {current=>$i,
 		  				value =>$value, 
+						type_digital => $type_digital_value,
+						type_pwm => $type_pwm_value,  
+						invert_value => $invertCheck_value,
+
 						errormessage=>$error, 
 						class=>$class,
-						hostname =>lbhostname(),
-						INVERTLIST =>$invertselectlist};
+						hostname =>lbhostname()};
   	} else {
-			# for inputs need to configure the wiring Dropdown
-			my $wiring=     $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
-			my $confwiring= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
-			my @wiring = ('d', 'u' );
-			my %wiringlabels = (
-					'd' => 'Pulldown',
-					'u' => 'Pullup',
-			);
-			my $wiringselectlist = $cgi->popup_menu(
-					-id	=> 'INPUTS.INPUTWIRING' . $i,
-					-name    => 'INPUTS.INPUTWIRING' . $i,
-					-values  => \@wiring,
-					-labels  => \%wiringlabels,
-					-default => $confwiring,
-			);
+			my $conf_wiring= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
+			#'d' => 'Pulldown','u' => 'Pullup'
+			my $wiring_u_value = '';
+			my $wiring_d_value = '';
+
+			if ($conf_wiring eq "u"){
+				$wiring_u_value = "checked=checked";
+			} else {
+				$wiring_d_value = "checked=checked";
+			}
+
   		push @result, {current=>$i,
-											value =>$value,
-											errormessage=>$error,
-											class=>$class,
-											SELECTLIST =>$wiringselectlist,
-											hostname =>lbhostname()
-										};
+						value =>$value,
+						wiring_u=>$wiring_u_value,
+						wiring_d=>$wiring_d_value,
+						
+						errormessage=>$error,
+						class=>$class,
+						hostname =>lbhostname()
+					};
   	}
   }
   return @result;
