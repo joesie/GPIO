@@ -105,7 +105,7 @@
               <h3>Ausgänge</h3>
               <div class="ui-grid-a ui-responsive">
                 <TMPL_LOOP NAME="number_of_outputs">
-                  <div class="ui-block-b">
+                  <div class="<TMPL_VAR NAME=class_box>">
                     <div class="<TMPL_VAR NAME=class> ui-corner-all custom-corners">
 
                       <div class="ui-bar ui-bar-a <TMPL_VAR NAME=class>">
@@ -154,7 +154,7 @@
                             <input type="text" id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>">
                             <p class="error_hint"><TMPL_VAR NAME="errormessage_pin" /></p>  
                           </div>
-                          <div class="gpioconf <TMPL_VAR NAME=class_frequency>">  
+                          <div id="frequency<TMPL_VAR NAME=current>" class="gpioconf <TMPL_VAR NAME=class_frequency>" style="display: <TMPL_VAR NAME=display_frequency>;">  
                             <label for="frequency<TMPL_VAR NAME=current>">Frequenz[Hz]:</label>
                             <input type="text" id="frequency<TMPL_VAR NAME=current>" name="frequency<TMPL_VAR NAME=current>" value="<TMPL_VAR frequency>">
                               
@@ -164,10 +164,11 @@
                         <fieldset data-role="controlgroup" data-type="horizontal" class="ui-block-b gpio-right">
                             
                             <input type="radio" name="OUTPUTS.TYPE<TMPL_VAR NAME=current>" id="OUTPUTS.TYPE<TMPL_VAR NAME=current>" value="digital" <TMPL_VAR NAME=type_digital>>
-                            <label for="OUTPUTS.TYPE<TMPL_VAR NAME=current>">Digital</label>
+                            <label for="OUTPUTS.TYPE<TMPL_VAR NAME=current>" onclick="$('#frequency<TMPL_VAR NAME=current>').hide();">Digital</label>
+                            
                             <input type="radio" name="OUTPUTS.TYPE<TMPL_VAR NAME=current>" id="OUTPUTS.TYPE<TMPL_VAR NAME=current>a" value="pwm" <TMPL_VAR NAME=type_pwm>>
-                            <label for="OUTPUTS.TYPE<TMPL_VAR NAME=current>a">PWM</label>
-        
+                            <label for="OUTPUTS.TYPE<TMPL_VAR NAME=current>a" onclick="$('#frequency<TMPL_VAR NAME=current>').show();">PWM</label>
+                            
                             <input type="checkbox" name="OUTPUTS.INVERT<TMPL_VAR NAME=current>" id="OUTPUTS.INVERT<TMPL_VAR NAME=current>" value="true" <TMPL_VAR NAME=invert_value>>
                             <label for="OUTPUTS.INVERT<TMPL_VAR NAME=current>">Invertiert</label>
                                 

@@ -97,7 +97,7 @@ if ( param('saveIoConfig') ) {
 		my $outputValue = param("output$currentOutputCount");
 		my $isInverted = param("OUTPUTS.INVERT$currentOutputCount");
 		my $outputtype = param("OUTPUTS.TYPE$currentOutputCount");
-		my $frequency = param("frequency$currentOutputCount");
+		
 
 		# if value is empty, user hasn't check the button. We set the value false in config file
 		if($isInverted eq ''){
@@ -107,13 +107,18 @@ if ( param('saveIoConfig') ) {
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{pin} = "$outputValue";
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{invert} = "$isInverted";
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{type} = "$outputtype";
-		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{frequency} = "$frequency";
-
 		
-		if(looks_like_number($frequency) eq ''){
-			$messagetype = "error";
-			$errormessages{"outputs.frequency$currentOutputCount"} = "Eingabe $frequency ist keine Zahl";
+		if($outputtype eq "pwm"){
+			my $frequency = param("frequency$currentOutputCount");
+			$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{frequency} = "$frequency";
+
+			if(looks_like_number($frequency) eq ''){
+				$messagetype = "error";
+				$errormessages{"outputs.frequency$currentOutputCount"} = "Eingabe $frequency ist keine Zahl";
+			}
 		}
+		
+		
 
 		my $result = &validateGpioUserData($outputValue);
 		if($result ne("ok")){
@@ -171,14 +176,21 @@ sub createInputOutputConfig{
 	my $value = $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{pin};
   	my $error_pin = $errormessages{"$_[1].pin$i"};
 	my $error_frequency = $errormessages{"$_[1].frequency$i"};  
+	my $display_frequency = "none";
   	my $class_pin = "info";
 	my $class_frequency = "info";  
+	my $box_class = "ui-block-a";
   	if($error_pin ne ""){
   		$class_pin = "error";
   	}
 	if($error_frequency ne ""){
   		$class_frequency = "error";
   	}  
+	#all even boxes will be show on the left side. They have to be marked with class "..block-a".
+	#all odd boxes will be show on the right side. They have to be marked with class "..blocl-b".  
+	if ($i & 1){
+		$box_class = "ui-block-b"
+	}  
 
     if($_[1] eq "outputs"){
 		# build invert dropdown for outputs
@@ -193,6 +205,7 @@ sub createInputOutputConfig{
 		my $type_pwm_value = '';
 		if ($conf_type eq "pwm"){
 			$type_pwm_value = "checked=checked";
+			$display_frequency = "block";
 		} else {
 			$type_digital_value = "checked=checked";
 		}
@@ -215,6 +228,8 @@ sub createInputOutputConfig{
 						class_pin=>$class_pin,
 						errormessage_frequency=>$error_frequency, 
 						class_frequency=>$class_frequency,
+						class_box => $box_class,
+						display_frequency=>$display_frequency,
 
 						hostname =>lbhostname()};
   	} else {
