@@ -16,6 +16,10 @@ class MqttClient():
     #Configuration MQTT Topics
     hostname = socket.gethostname() 
     MQTT_TOPIC_OUTPUT  = hostname + "/gpio/set/"
+    MQTT_TOPIC_PWM = hostname + "/gpio/pwm/"
+    MQTT_TOPIC_PWM_FREQUENCY = hostname + "/gpio/pwm/freq/"
+    MQTT_TOPIC_PWM_DC = hostname + "/gpio/pwm/dc/"
+    
     MQTT_RESPONSE_STATE = hostname + "/gpio/"
     
     _LOGGER = None
@@ -82,6 +86,7 @@ class MqttClient():
     ##
     def on_connectCallback(self, client, userdata, flags, rc):
         client.subscribe(MqttClient.MQTT_TOPIC_OUTPUT + "#")
+        client.subscribe(MqttClient.MQTT_TOPIC_PWM + "#")
         
 
     def on_messageCallback(self, client, userdata, msg):
@@ -107,18 +112,37 @@ class MqttClient():
                 self._LOGGER.exception(str(e))
                 self.client.publish(MqttClient.MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
 
-        # Search for topic in List of available output pins (BCM names) and set gpio to state LOW or HIGH
-        switched = False
-        for channel in Channel.outputChannels:
-            if mytopic == MqttClient.MQTT_TOPIC_OUTPUT + str(channel.pin) :
+        # Handle output Topic
+        if(mytopic.startswith(MqttClient.MQTT_TOPIC_OUTPUT)):
+            switched = False
+            # Search for topic in List of available output pins and set gpio to state LOW or HIGH
+            for channel in Channel.outputChannels:
+                if mytopic == MqttClient.MQTT_TOPIC_OUTPUT + str(channel.pin) :
+                    try:
+                        channel.setOutput(channel, mymsg)
+                        switched = True
+                    except Exception as e:
+                        self._LOGGER.exception(str(e))
+                        self.client.publish(MqttClient.MQTT_RESPONSE_STATE + str(channel.pin) + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
+            if switched == False:
+                self.client.publish(MqttClient.MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, unknown Topic: " + mytopic, retain = True)
+        
+        # Handle PWM Topic 
+        if(mytopic.startswith(MqttClient.MQTT_TOPIC_PWM)):
+            for channel in Channel.outputChannels:
                 try:
-                    OutputChannel.setOutput(channel, mymsg)
-                    switched = True
+                    #set frequency
+                    if mytopic == MqttClient.MQTT_TOPIC_PWM_FREQUENCY + str(channel.pin) :
+                        channel.setFrequency(mymsg)
+                        self._LOGGER.debug("set frequency " + mymsg + " channel " + str(channel.pin))
+                    #set duty cycle 
+                    if mytopic == MqttClient.MQTT_TOPIC_PWM_DC + str(channel.pin) :   
+                        channel.setDutyCycle(mymsg)
+                        self._LOGGER.debug("set frequency " + mymsg + " channel " + str(channel.pin))
                 except Exception as e:
-                    self._LOGGER.exception(str(e))
-                    self.client.publish(MqttClient.MQTT_RESPONSE_STATE + str(channel.pin) + "/stateText", "Error, can't set GPIO. For more information read the logfile!", retain = True)
-        if switched == False:
-            self.client.publish(MqttClient.MQTT_RESPONSE_STATE + "error" + "/stateText", "Error, unknown Topic: " + mytopic, retain = True)
+                        self._LOGGER.exception(str(e))
+                        self.client.publish(MqttClient.MQTT_RESPONSE_STATE + str(channel.pin) + "/stateText", "Error, can't set PWM. For more information read the logfile!", retain = True)
+
 
     def loop_forever(self):
             self.client.loop_forever()

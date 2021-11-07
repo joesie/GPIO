@@ -115,6 +115,8 @@ class InputChannel(Channel):
 
 class OutputChannel(Channel):
     isInverted = False
+    isPwm = False
+    pwmTask = None
 
     def __init__(self, channel, _LOGGER, client):
         Channel.__init__(self, _LOGGER, client, int(channel['pin']))
@@ -122,16 +124,27 @@ class OutputChannel(Channel):
         self.isInverted = False
         if channel['invert'] == 'true':
             self.isInverted = True
+        if channel['type'] == 'pwm':
+            self.isPwm = True    
 
-        GPIO.setup(int(channel['pin']), GPIO.OUT)
-        GPIO.output(int(channel['pin']), self.isInverted) 
-        _LOGGER.info("set Pin " + channel['pin'] + " as Output")
+        GPIO.setup(int(channel['pin']), GPIO.OUT)    
+
+        if self.isPwm == True:
+            self.pwmTask = GPIO.PWM(int(channel['pin']), float(channel['frequency']))
+            self.pwmTask.start(1)
+            _LOGGER.info("set Pin " + channel['pin'] + " as PWM")
+        else:    
+            GPIO.output(int(channel['pin']), self.isInverted) 
+            _LOGGER.info("set Pin " + channel['pin'] + " as Output")
 
     ##
     #   handle output command
     ##
     def setOutput(self, channel, value):
         if value == "ON" or value == "1" or value == "on" :
+            if channel.isPwm == True:
+                self._LOGGER.error("can not change pin value on a configured PWM channel!")
+
             if(self.isInverted == True):
                 GPIO.output(int(channel.pin), GPIO.LOW)
             else:       
@@ -145,6 +158,17 @@ class OutputChannel(Channel):
 
             channel.send_mqtt_pin_value(0)
 
+    ##
+    # set PWM Frequency 
+    # if it isn't a configured PWM Channel a exception will be throwed
+    def setFrequency(self, value):
+        self.pwmTask.ChangeFrequency(float(value)) 
+
+    ##
+    # set PWM Duty Cycle
+    # if it isn't a configured PWM Channel a exception will be throwed
+    def setDutyCycle(self, value):
+        self.pwmTask.ChangeDutyCycle(float(value))
 
     @staticmethod   
     def handle_setOutput(pin, value):
