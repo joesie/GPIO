@@ -79,11 +79,11 @@
                       </div>
                       <div class="ui-body ui-body-a ui-grid-a ui-responsive">
                         <fieldset data-role="controlgroup" data-type="horizontal" class="ui-block-b">
-                          <div class="gpioconf <TMPL_VAR NAME=class>">     
+                          <div class="gpioconf <TMPL_VAR NAME=class_pin>">     
                             
                             <label for="input<TMPL_VAR NAME=current>">Pin:</label>
                             <input type="text" id="input<TMPL_VAR NAME=current>" name="input<TMPL_VAR NAME=current>" value="<TMPL_VAR value>">
-                            <p class="error_hint"><TMPL_VAR NAME="errormessage" /></p>
+                            <p class="error_hint"><TMPL_VAR NAME="errormessage_pin" /></p>
                           </div>
                         </fieldset>
                         <fieldset data-role="controlgroup" data-type="horizontal" class="ui-block-b gpio-right">
@@ -148,13 +148,17 @@
                           </div> 
                       </div>
                       <div class="ui-body ui-body-a ui-grid-a ui-responsive">
-                        <fieldset data-role="controlgroup" data-type="horizontal" class="ui-block-b">
-                          
-                          <div class="gpioconf <TMPL_VAR NAME=class>">     
-                            
+                        <fieldset data-role="controlgroup" data-type="horizontal" class="ui-block-b">                   
+                          <div class="gpioconf <TMPL_VAR NAME=class_pin>">     
                             <label for="output<TMPL_VAR NAME=current>">Pin:</label>
                             <input type="text" id="output<TMPL_VAR NAME=current>" name="output<TMPL_VAR NAME=current>" value="<TMPL_VAR value>">
-                            <p class="error_hint"><TMPL_VAR NAME="errormessage" /></p>
+                            <p class="error_hint"><TMPL_VAR NAME="errormessage_pin" /></p>  
+                          </div>
+                          <div class="gpioconf <TMPL_VAR NAME=class_frequency>">  
+                            <label for="frequency<TMPL_VAR NAME=current>">Frequenz[Hz]:</label>
+                            <input type="text" id="frequency<TMPL_VAR NAME=current>" name="frequency<TMPL_VAR NAME=current>" value="<TMPL_VAR frequency>">
+                              
+                            <p class="error_hint"><TMPL_VAR NAME="errormessage_frequency" /></p>
                           </div>
                         </fieldset>
                         <fieldset data-role="controlgroup" data-type="horizontal" class="ui-block-b gpio-right">

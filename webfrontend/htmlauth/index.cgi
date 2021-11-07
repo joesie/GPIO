@@ -9,6 +9,7 @@ use LoxBerry::IO;
 use CGI qw/:standard/;
 use warnings;
 use strict;
+use Scalar::Util qw(looks_like_number);
 
 use IPC::System::Simple qw(system capture);
 use LoxBerry::JSON;
@@ -96,6 +97,7 @@ if ( param('saveIoConfig') ) {
 		my $outputValue = param("output$currentOutputCount");
 		my $isInverted = param("OUTPUTS.INVERT$currentOutputCount");
 		my $outputtype = param("OUTPUTS.TYPE$currentOutputCount");
+		my $frequency = param("frequency$currentOutputCount");
 
 		# if value is empty, user hasn't check the button. We set the value false in config file
 		if($isInverted eq ''){
@@ -105,6 +107,13 @@ if ( param('saveIoConfig') ) {
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{pin} = "$outputValue";
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{invert} = "$isInverted";
 		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{type} = "$outputtype";
+		$pcfg->{gpio}->{outputs}->{"channel_$currentOutputCount"}->{frequency} = "$frequency";
+
+		
+		if(looks_like_number($frequency) eq ''){
+			$messagetype = "error";
+			$errormessages{"outputs.frequency$currentOutputCount"} = "Eingabe $frequency ist keine Zahl";
+		}
 
 		my $result = &validateGpioUserData($outputValue);
 		if($result ne("ok")){
@@ -159,17 +168,26 @@ sub createInputOutputConfig{
 
   for($i=0;$i<$_[0];$i++){
 
-		my $value = $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{pin};
-  	my $error = $errormessages{"$_[1].pin$i"};
-  	my $class = "info";;
-  	if($error ne ""){
-  		$class = "error";
+	my $value = $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{pin};
+  	my $error_pin = $errormessages{"$_[1].pin$i"};
+	my $error_frequency = $errormessages{"$_[1].frequency$i"};  
+  	my $class_pin = "info";
+	my $class_frequency = "info";  
+  	if($error_pin ne ""){
+  		$class_pin = "error";
   	}
+	if($error_frequency ne ""){
+  		$class_frequency = "error";
+  	}  
 
     if($_[1] eq "outputs"){
 		# build invert dropdown for outputs
 		my $conf_invert= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{invert};
 		my $conf_type= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{type};
+		my $conf_frequency= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{frequency};
+		if($conf_frequency eq ''){
+			$conf_frequency = 0;
+		}
 
 		my $type_digital_value = '';
 		my $type_pwm_value = '';
@@ -191,9 +209,13 @@ sub createInputOutputConfig{
 						type_digital => $type_digital_value,
 						type_pwm => $type_pwm_value,  
 						invert_value => $invertCheck_value,
+						frequency => $conf_frequency,
 
-						errormessage=>$error, 
-						class=>$class,
+						errormessage_pin=>$error_pin, 
+						class_pin=>$class_pin,
+						errormessage_frequency=>$error_frequency, 
+						class_frequency=>$class_frequency,
+
 						hostname =>lbhostname()};
   	} else {
 			my $conf_wiring= $pcfg->{gpio}->{"$_[1]"}->{"channel_$i"}->{wiring};
@@ -212,8 +234,9 @@ sub createInputOutputConfig{
 						wiring_u=>$wiring_u_value,
 						wiring_d=>$wiring_d_value,
 						
-						errormessage=>$error,
-						class=>$class,
+						errormessage_pin=>$error_pin, 
+						class_pin=>$class_pin,
+						
 						hostname =>lbhostname()
 					};
   	}
