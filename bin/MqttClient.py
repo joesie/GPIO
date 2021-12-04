@@ -119,7 +119,7 @@ class MqttClient():
             for channel in Channel.outputChannels:
                 if mytopic == MqttClient.MQTT_TOPIC_OUTPUT + str(channel.pin) :
                     try:
-                        channel.setOutput(channel, mymsg)
+                        channel.setOutput(mymsg)
                         switched = True
                     except Exception as e:
                         self._LOGGER.exception(str(e))
@@ -145,7 +145,7 @@ class MqttClient():
 
 
     def loop_forever(self):
-            self.client.loop_forever()
+        self.client.loop_forever()
 
     def disconnect(self):
         self.client.disconnect()   

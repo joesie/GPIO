@@ -140,23 +140,21 @@ class OutputChannel(Channel):
     ##
     #   handle output command
     ##
-    def setOutput(self, channel, value):
+    def setOutput(self, value):
         if value == "ON" or value == "1" or value == "on" :
-            if channel.isPwm == True:
-                self._LOGGER.error("can not change pin value on a configured PWM channel!")
-
+            
             if(self.isInverted == True):
-                GPIO.output(int(channel.pin), GPIO.LOW)
+                GPIO.output(int(self.channel.pin), GPIO.LOW)
             else:       
-                GPIO.output(int(channel.pin), GPIO.HIGH)
-            channel.send_mqtt_pin_value(1)
+                GPIO.output(int(self.channel.pin), GPIO.HIGH)
+            self.channel.send_mqtt_pin_value(1)
         if value == "OFF" or value == "0" or value == "off":
             if(self.isInverted == True):
-                GPIO.output(int(channel.pin), GPIO.HIGH)
+                GPIO.output(int(self.channel.pin), GPIO.HIGH)
             else:       
-                GPIO.output(int(channel.pin), GPIO.LOW)
+                GPIO.output(int(self.channel.pin), GPIO.LOW)
 
-            channel.send_mqtt_pin_value(0)
+            self.channel.send_mqtt_pin_value(0)
 
     ##
     # set PWM Frequency 
@@ -174,5 +172,5 @@ class OutputChannel(Channel):
     def handle_setOutput(pin, value):
         for channel in Channel.outputChannels:
             if(str(channel.pin) == str(pin)):
-                channel.setOutput(channel, value)
+                channel.setOutput(value)
                     
