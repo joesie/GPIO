@@ -144,15 +144,15 @@ class OutputChannel(Channel):
         if value == "ON" or value == "1" or value == "on" :
             
             if(self.isInverted == True):
-                GPIO.output(int(self.channel.pin), GPIO.LOW)
+                GPIO.output(int(self.pin), GPIO.LOW)
             else:       
-                GPIO.output(int(self.channel.pin), GPIO.HIGH)
+                GPIO.output(int(self.pin), GPIO.HIGH)
             self.channel.send_mqtt_pin_value(1)
         if value == "OFF" or value == "0" or value == "off":
             if(self.isInverted == True):
-                GPIO.output(int(self.channel.pin), GPIO.HIGH)
+                GPIO.output(int(self.pin), GPIO.HIGH)
             else:       
-                GPIO.output(int(self.channel.pin), GPIO.LOW)
+                GPIO.output(int(self.pin), GPIO.LOW)
 
             self.channel.send_mqtt_pin_value(0)
 
