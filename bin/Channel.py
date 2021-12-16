@@ -121,11 +121,14 @@ class OutputChannel(Channel):
     def __init__(self, channel, _LOGGER, client):
         Channel.__init__(self, _LOGGER, client, int(channel['pin']))
 
-        self.isInverted = False
-        if channel['invert'] == 'true':
-            self.isInverted = True
-        if channel['type'] == 'pwm':
-            self.isPwm = True    
+        try:
+            if channel['invert'] == 'true':
+                self.isInverted = True
+            if channel['type'] == 'pwm':
+                self.isPwm = True        
+        except Exception as e:
+            _LOGGER.info("old json configuration used. Inveration of IOs and or PWM not supoorted")
+            _LOGGER.exception(str(e))
 
         GPIO.setup(int(channel['pin']), GPIO.OUT)    
 

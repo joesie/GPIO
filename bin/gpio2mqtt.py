@@ -103,12 +103,6 @@ try:
     client.loop_forever()
 except Exception as e:
     _LOGGER.exception(str(e))
-# except KeyboardInterrupt:
-#     _LOGGER.info("Stop MQTT Client")
-#     client.disconnect() # disconnect gracefully
-#     client.loop_stop() # stops network loop
-#     GPIO.cleanup()
-#     logging.shutdown()
 finally:
     _LOGGER.info("Stop MQTT Client")
     client.disconnect() # disconnect gracefully

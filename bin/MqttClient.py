@@ -28,7 +28,8 @@ class MqttClient():
     # publish MQTT
     ##
     def publish(self, topic, payload=None, qos=0, retain=False, properties=None):
-        self.client.publish(topic, payload=payload, qos=qos, retain=retain, properties=properties)
+       # self.client.publish(topic, payload=payload, qos=qos, retain=retain, properties=properties)
+       self.client.publish(topic, payload=payload, qos=qos, retain=retain)
 
     # ============================
     ##
@@ -86,8 +87,10 @@ class MqttClient():
     ##
     def on_connectCallback(self, client, userdata, flags, rc):
         client.subscribe(MqttClient.MQTT_TOPIC_OUTPUT + "#")
+        self._LOGGER.debug("Subscribe topic: " + MqttClient.MQTT_TOPIC_OUTPUT + "#")
         client.subscribe(MqttClient.MQTT_TOPIC_PWM + "#")
-        
+        self._LOGGER.debug("Subscribe topic: " + MqttClient.MQTT_TOPIC_PWM + "#")
+
 
     def on_messageCallback(self, client, userdata, msg):
         mymsg = str(msg.payload.decode("utf-8"))
@@ -117,7 +120,11 @@ class MqttClient():
             switched = False
             # Search for topic in List of available output pins and set gpio to state LOW or HIGH
             for channel in Channel.outputChannels:
-                if mytopic == MqttClient.MQTT_TOPIC_OUTPUT + str(channel.pin) :
+                
+                self._LOGGER.debug("mytopic  : " + mytopic)
+                self._LOGGER.debug("testtopic: " + MqttClient.MQTT_TOPIC_OUTPUT + str(channel.pin))
+
+                if mytopic.strip() == MqttClient.MQTT_TOPIC_OUTPUT + str(channel.pin) :
                     try:
                         channel.setOutput(mymsg)
                         switched = True
@@ -132,11 +139,11 @@ class MqttClient():
             for channel in Channel.outputChannels:
                 try:
                     #set frequency
-                    if mytopic == MqttClient.MQTT_TOPIC_PWM_FREQUENCY + str(channel.pin) :
+                    if mytopic.strip() == MqttClient.MQTT_TOPIC_PWM_FREQUENCY + str(channel.pin) :
                         channel.setFrequency(mymsg)
                         self._LOGGER.debug("set frequency " + mymsg + " channel " + str(channel.pin))
                     #set duty cycle 
-                    if mytopic == MqttClient.MQTT_TOPIC_PWM_DC + str(channel.pin) :   
+                    if mytopic.strip() == MqttClient.MQTT_TOPIC_PWM_DC + str(channel.pin) :   
                         channel.setDutyCycle(mymsg)
                         self._LOGGER.debug("set frequency " + mymsg + " channel " + str(channel.pin))
                 except Exception as e:
@@ -156,7 +163,6 @@ class MqttClient():
         self._LOGGER = _LOGGER
         self.client = mqtt.Client()
         mqttconf = self.createMqttConfig(configfile)
-        MqttClient.hostname = socket.gethostname()
 
         if mqttconf is None:
             raise ValueError("No MQTT config found.")
