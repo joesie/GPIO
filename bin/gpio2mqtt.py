@@ -17,6 +17,7 @@ from datetime import datetime
 import RPi.GPIO as GPIO
 import json
 import logging
+import os
 
 import getopt
 import sys
@@ -96,38 +97,46 @@ _LOGGER = setup_logger("GPIO2MQTT")
 _LOGGER.debug("logfile: " + logfileArg)
 _LOGGER.info("loglevel: " + logging.getLevelName(_LOGGER.level))
 
+def mqtt_connectiondetails():
+	LBSCONFIG = os.getenv('LBSCONFIG')
+	generaljsonPath = LBSCONFIG+'/general.json'
+	generaljsonFilehandle = open(generaljsonPath)
+	generaljson = json.load(generaljsonFilehandle)
+
+	sys.stderr.write ("Get LoxBerry MQTT Credentials from general.json\n")
+	sys.stderr.write ("System config dir: " + LBSCONFIG + "\n")
+	sys.stderr.write ("System config file: " + generaljsonPath + "\n")
+
+	if "Mqtt" in generaljson:
+		return generaljson['Mqtt']
+	else:
+		sys.stderr.write ("MQTT Gateway not installed\n")
+
+
 
 # ============================
 ##
 # get configuration from mqtt broker and store config in mqttconf variable
 ##
-mqttconf = None;
+mqttconf = None
+
 try:
-    with open(lbhomedir + '/data/system/plugindatabase.json') as json_plugindatabase_file:
-        plugindatabase = json.load(json_plugindatabase_file)
-        mqttconfigdir = plugindatabase['plugins']['07a6053111afa90479675dbcd29d54b5']['directories']['lbpconfigdir']
+    mqttcred = None
+    mqttcred = mqtt_connectiondetails()
 
-        mqttPluginconfig = None
-        with open(mqttconfigdir + '/mqtt.json') as json_mqttconfig_file:
-            mqttPluginconfig = json.load(json_mqttconfig_file)
+    sys.stderr.write( "Brokerhost: " + mqttcred['Brokerhost'] + "\n" )
+    sys.stderr.write( "Brokerport: " + mqttcred['Brokerport'] + "\n" )
+    sys.stderr.write( "Brokeruser: " + mqttcred['Brokeruser'] + "\n" )
+    sys.stderr.write( "Brokerpass: " + mqttcred['Brokerpass'] + "\n" )
+    sys.stderr.write( "Udpinport: " + mqttcred['Udpinport'] + "\n" )
+    sys.stderr.write( "Websocketport: " + mqttcred['Websocketport'] + "\n" )
 
-        mqttcred = None
-        with open(mqttconfigdir + '/cred.json') as json_mqttcred_file:
-            mqttcred = json.load(json_mqttcred_file)
-
-        mqttuser = mqttcred['Credentials']['brokeruser']
-        mqttpass = mqttcred['Credentials']['brokerpass']
-        mqttaddressArray = mqttPluginconfig['Main']['brokeraddress'].split(":")
-        mqttPort = MQTT_DEFAULT_PORT
-        if len(mqttaddressArray) > 1:
-            mqttPort = int(mqttaddressArray[1])
-
-        mqttconf = {
-            'username':mqttuser,
-            'password':mqttpass,
-            'address': mqttaddressArray[0],
-            'port': mqttPort
-        }
+    mqttconf = {
+        'username':mqttcred['Brokeruser'],
+        'password':mqttcred['Brokerpass'],
+        'address': mqttcred['Brokerhost'],
+        'port': int( mqttcred['Brokerport'])
+    }
     _LOGGER.debug("MQTT config" + str(mqttconf))
 except Exception as e:
     _LOGGER.exception(str(e))
